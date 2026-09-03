@@ -16,7 +16,8 @@
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.BibliotecaKotlin"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize"
+            tools:ignore="MissingClass">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

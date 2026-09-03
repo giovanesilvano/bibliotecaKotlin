@@ -1,4 +1,4 @@
-package com.exemplo.biblioteca.ui.screens
+package com.example.bibliotecakotlin.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*

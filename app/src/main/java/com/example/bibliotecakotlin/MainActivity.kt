@@ -1,47 +1,54 @@
-package com.example.bibliotecakotlin
+package com.exemplo.biblioteca
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.bibliotecakotlin.ui.theme.BibliotecaKotlinTheme
+import com.example.bibliotecakotlin.ui.screens.CatalogoScreen
+import com.example.bibliotecakotlin.ui.screens.DevolverScreen
+import com.example.bibliotecakotlin.ui.screens.EmprestimosScreen
+import com.example.bibliotecakotlin.ui.screens.LoginScreen
+import com.exemplo.biblioteca.ui.components.BottomNav
+import com.exemplo.biblioteca.ui.components.Tela
+import com.exemplo.biblioteca.ui.screens.*
+import com.exemplo.biblioteca.ui.theme.BibliotecaTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            BibliotecaKotlinTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
+            BibliotecaTheme { BibliotecaApp() }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+fun BibliotecaApp() {
+    var telaAtual by remember { mutableStateOf(Tela.LOGIN) }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    BibliotecaKotlinTheme {
-        Greeting("Android")
+    if (telaAtual == Tela.LOGIN) {
+        LoginScreen(onLogin = { telaAtual = Tela.CATALOGO })
+        return
+    }
+
+    Scaffold(
+        bottomBar = { BottomNav(telaAtual) { telaAtual = it } }
+    ) { padding ->
+        Box(Modifier.fillMaxSize().padding(bottom = padding.calculateBottomPadding())) {
+            when (telaAtual) {
+                Tela.CATALOGO -> CatalogoScreen()
+                Tela.EMPRESTAR -> EmprestarScreen(onConfirmar = { telaAtual = Tela.EMPRESTIMOS })
+                Tela.DEVOLVER -> DevolverScreen(onConfirmar = { telaAtual = Tela.EMPRESTIMOS })
+                Tela.EMPRESTIMOS -> EmprestimosScreen()
+                Tela.LOGIN -> Unit
+            }
+        }
     }
 }
