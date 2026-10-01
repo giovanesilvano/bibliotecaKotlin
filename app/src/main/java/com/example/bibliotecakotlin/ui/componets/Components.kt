@@ -1,5 +1,4 @@
-package com.exemplo.biblioteca.ui.components
-
+package com.example.bibliotecakotlin.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,7 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.exemplo.biblioteca.ui.theme.*
+import com.example.bibliotecakotlin.ui.theme.*
 
 enum class Tela { LOGIN, CATALOGO, EMPRESTAR, DEVOLVER, EMPRESTIMOS }
 

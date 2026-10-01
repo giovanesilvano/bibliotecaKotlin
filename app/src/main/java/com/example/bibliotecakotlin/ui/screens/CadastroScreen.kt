@@ -32,10 +32,10 @@ import androidx.compose.ui.unit.dp
 import com.example.bibliotecakotlin.auth.AuthManager
 
 @Composable
-fun LoginScreen(
-    onLoginSucesso: () -> Unit,
-    irParaCadastro: () -> Unit
+fun CadastroScreen(
+    irParaLogin: () -> Unit
 ) {
+    var nome by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
     var senhaVisivel by remember { mutableStateOf(false) }
@@ -50,18 +50,23 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Biblioteca",
+            text = "Criar conta",
             style = MaterialTheme.typography.headlineLarge
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
-        Text(
-            text = "Entre para acessar o sistema",
-            style = MaterialTheme.typography.bodyLarge
+        OutlinedTextField(
+            value = nome,
+            onValueChange = { nome = it },
+            label = {
+                Text("Nome")
+            },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = email,
@@ -115,22 +120,32 @@ fun LoginScreen(
         Button(
             onClick = {
                 when {
-                    email.isBlank() || senha.isBlank() -> {
+                    nome.isBlank() || email.isBlank() || senha.isBlank() -> {
                         Toast.makeText(
                             context,
-                            "Preencha e-mail e senha.",
+                            "Preencha todos os campos.",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
 
-                    AuthManager.login(email, senha) -> {
-                        onLoginSucesso()
+                    AuthManager.cadastrar(
+                        nome = nome,
+                        email = email,
+                        senha = senha
+                    ) -> {
+                        Toast.makeText(
+                            context,
+                            "Cadastro realizado com sucesso.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        irParaLogin()
                     }
 
                     else -> {
                         Toast.makeText(
                             context,
-                            "E-mail ou senha inválidos.",
+                            "Este e-mail já está cadastrado.",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -138,13 +153,13 @@ fun LoginScreen(
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Entrar")
+            Text("Cadastrar")
         }
 
         TextButton(
-            onClick = irParaCadastro
+            onClick = irParaLogin
         ) {
-            Text("Não possui uma conta? Cadastre-se")
+            Text("Já tenho uma conta")
         }
     }
 }

@@ -1,5 +1,4 @@
-package com.exemplo.biblioteca.ui.theme
-
+package com.example.bibliotecakotlin.ui.theme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable

@@ -1,5 +1,7 @@
-package com.exemplo.biblioteca.ui.screens
-
+package com.example.bibliotecakotlin.ui.screens
+import com.example.bibliotecakotlin.data.MockData
+import com.example.bibliotecakotlin.ui.components.*
+import com.example.bibliotecakotlin.ui.theme.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
