@@ -112,8 +112,8 @@ private fun TelaComNavegacao(
     Scaffold(
         bottomBar = {
             BottomNav(
-                atual = telaAtual,
-                onSelecionar = { telaSelecionada ->
+                telaAtual = telaAtual,
+                onNavigate = { telaSelecionada ->
                     when (telaSelecionada) {
                         Tela.CATALOGO -> {
                             navController.navigate(Catalogo) {
