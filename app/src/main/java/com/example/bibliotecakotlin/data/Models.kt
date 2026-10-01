@@ -1,4 +1,4 @@
-package com.exemplo.biblioteca.data
+package com.example.bibliotecakotlin.data
 
 import androidx.compose.ui.graphics.Color
 

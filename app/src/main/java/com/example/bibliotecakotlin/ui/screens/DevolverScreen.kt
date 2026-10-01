@@ -16,9 +16,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.exemplo.biblioteca.data.MockData
-import com.exemplo.biblioteca.ui.components.*
-import com.exemplo.biblioteca.ui.theme.*
+import com.example.bibliotecakotlin.data.MockData
+import com.example.bibliotecakotlin.ui.components.*
+import com.example.bibliotecakotlin.ui.theme.*
 
 @Composable
 fun DevolverScreen(onConfirmar: () -> Unit) {
