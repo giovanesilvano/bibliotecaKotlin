@@ -10,7 +10,7 @@ internal class AppDatabase(context: Context) : SQLiteOpenHelper(
     context.applicationContext,
     File(context.noBackupFilesDir, "biblioteca.db").absolutePath,
     null,
-    1
+    2
 ) {
     override fun onConfigure(db: SQLiteDatabase) {
         db.setForeignKeyConstraintsEnabled(true)
@@ -36,7 +36,6 @@ internal class AppDatabase(context: Context) : SQLiteOpenHelper(
                 autor TEXT NOT NULL,
                 categoria TEXT NOT NULL,
                 capa_texto TEXT NOT NULL,
-                capa_cor INTEGER NOT NULL,
                 isbn TEXT NOT NULL,
                 edicao TEXT NOT NULL,
                 estante TEXT NOT NULL
@@ -57,7 +56,7 @@ internal class AppDatabase(context: Context) : SQLiteOpenHelper(
             )
             """.trimIndent()
         )
-        // Carga inicial dos livros: depende do seu MockData (ver observação abaixo).
+        // Os livros de exemplo são inseridos pelo LivroDao (semearSeNecessario).
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
