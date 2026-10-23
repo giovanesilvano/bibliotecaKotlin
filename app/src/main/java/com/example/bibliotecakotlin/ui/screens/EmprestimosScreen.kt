@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -15,22 +16,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.bibliotecakotlin.data.Emprestimo
-import com.example.bibliotecakotlin.data.MockData
-import com.example.bibliotecakotlin.data.StatusEmprestimo
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.bibliotecakotlin.data.model.Emprestimo
+import com.example.bibliotecakotlin.data.model.StatusEmprestimo
 import com.example.bibliotecakotlin.ui.components.*
 import com.example.bibliotecakotlin.ui.theme.*
+import com.example.bibliotecakotlin.ui.viewmodel.EmprestimoViewModel
 
 @Composable
-fun EmprestimosScreen() {
+fun EmprestimosScreen(vm: EmprestimoViewModel = viewModel()) {
+    LaunchedEffect(Unit) { vm.listar() }
+
+    val ativos = vm.emprestimos.filter { it.status != StatusEmprestimo.DEVOLVIDO }
+    val atrasados = ativos.count { it.status == StatusEmprestimo.ATRASADO }
+
     Column(Modifier.fillMaxSize().background(Background)) {
         HeaderAzul("Sua biblioteca", "Meus Empréstimos", mostrarAvatar = true)
 
         LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    CardResumo("3", "Empréstimos ativos", Primary, PrimaryLight, Modifier.weight(1f))
-                    CardResumo("1", "Prazo nesta semana", Orange, OrangeLight, Modifier.weight(1f))
+                    CardResumo(ativos.size.toString(), "Empréstimos ativos", Primary, PrimaryLight, Modifier.weight(1f))
+                    CardResumo(atrasados.toString(), "Em atraso", Orange, OrangeLight, Modifier.weight(1f))
                 }
             }
             item {
@@ -39,7 +46,18 @@ fun EmprestimosScreen() {
                     Text("Ordenar", color = Primary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
                 }
             }
-            items(MockData.emprestimos) { CardEmprestimo(it) }
+            vm.mensagem?.let { msg ->
+                item { Text(msg, color = Red, fontSize = 14.sp) }
+            }
+            if (ativos.isEmpty()) {
+                item {
+                    Text(
+                        if (vm.carregando) "Carregando..." else "Você não tem empréstimos ativos.",
+                        color = TextGray, fontSize = 14.sp
+                    )
+                }
+            }
+            items(ativos, key = { it.id }) { CardEmprestimo(it) }
         }
     }
 }
@@ -83,7 +101,7 @@ private fun CardEmprestimo(e: Emprestimo) {
         HorizontalDivider(color = PrimaryLight, modifier = Modifier.padding(horizontal = 20.dp))
         Row(Modifier.fillMaxWidth().padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(e.infoPrazo, color = if (atrasado) Red else Green, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, modifier = Modifier.weight(1f))
-            Text(if (atrasado) "Ver detalhes" else "Renovar", color = Primary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+            Text(if (atrasado) "Ver detalhes" else "Prazo: 10 dias", color = Primary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
         }
     }
 }

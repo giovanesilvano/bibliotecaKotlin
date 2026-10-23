@@ -19,6 +19,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,11 +30,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.bibliotecakotlin.auth.AuthManager
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.bibliotecakotlin.ui.viewmodel.AuthViewModel
 
 @Composable
 fun CadastroScreen(
-    irParaLogin: () -> Unit
+    irParaLogin: () -> Unit,
+    vm: AuthViewModel = viewModel()
 ) {
     var nome by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -41,6 +44,23 @@ fun CadastroScreen(
     var senhaVisivel by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+
+    // Cadastro concluído: avisa e vai para o login
+    LaunchedEffect(vm.concluido) {
+        if (vm.concluido) {
+            Toast.makeText(context, "Cadastro realizado com sucesso.", Toast.LENGTH_SHORT).show()
+            vm.consumirResultado()
+            irParaLogin()
+        }
+    }
+
+    // Erros (validação, e-mail duplicado, etc.)
+    LaunchedEffect(vm.mensagem) {
+        vm.mensagem?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            vm.consumirResultado()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -59,9 +79,7 @@ fun CadastroScreen(
         OutlinedTextField(
             value = nome,
             onValueChange = { nome = it },
-            label = {
-                Text("Nome")
-            },
+            label = { Text("Nome") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
@@ -71,9 +89,7 @@ fun CadastroScreen(
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = {
-                Text("E-mail")
-            },
+            label = { Text("E-mail") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
@@ -83,9 +99,7 @@ fun CadastroScreen(
         OutlinedTextField(
             value = senha,
             onValueChange = { senha = it },
-            label = {
-                Text("Senha")
-            },
+            label = { Text("Senha") },
             singleLine = true,
             visualTransformation = if (senhaVisivel) {
                 VisualTransformation.None
@@ -93,22 +107,14 @@ fun CadastroScreen(
                 PasswordVisualTransformation()
             },
             trailingIcon = {
-                IconButton(
-                    onClick = {
-                        senhaVisivel = !senhaVisivel
-                    }
-                ) {
+                IconButton(onClick = { senhaVisivel = !senhaVisivel }) {
                     Icon(
                         imageVector = if (senhaVisivel) {
                             Icons.Default.Visibility
                         } else {
                             Icons.Default.VisibilityOff
                         },
-                        contentDescription = if (senhaVisivel) {
-                            "Ocultar senha"
-                        } else {
-                            "Mostrar senha"
-                        }
+                        contentDescription = if (senhaVisivel) "Ocultar senha" else "Mostrar senha"
                     )
                 }
             },
@@ -119,46 +125,19 @@ fun CadastroScreen(
 
         Button(
             onClick = {
-                when {
-                    nome.isBlank() || email.isBlank() || senha.isBlank() -> {
-                        Toast.makeText(
-                            context,
-                            "Preencha todos os campos.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-
-                    AuthManager.cadastrar(
-                        nome = nome,
-                        email = email,
-                        senha = senha
-                    ) -> {
-                        Toast.makeText(
-                            context,
-                            "Cadastro realizado com sucesso.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-
-                        irParaLogin()
-                    }
-
-                    else -> {
-                        Toast.makeText(
-                            context,
-                            "Este e-mail já está cadastrado.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+                if (nome.isBlank() || email.isBlank() || senha.isBlank()) {
+                    Toast.makeText(context, "Preencha todos os campos.", Toast.LENGTH_SHORT).show()
+                } else {
+                    vm.cadastrar(nome, email, senha)
                 }
             },
+            enabled = !vm.carregando,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Cadastrar")
+            Text(if (vm.carregando) "Cadastrando..." else "Cadastrar")
         }
 
-        TextButton(
-            onClick = irParaLogin
-        ) {
+        TextButton(onClick = irParaLogin) {
             Text("Já tenho uma conta")
         }
     }

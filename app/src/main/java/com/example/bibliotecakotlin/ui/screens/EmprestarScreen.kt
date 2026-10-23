@@ -1,7 +1,5 @@
 package com.example.bibliotecakotlin.ui.screens
-import com.example.bibliotecakotlin.data.MockData
-import com.example.bibliotecakotlin.ui.components.*
-import com.example.bibliotecakotlin.ui.theme.*
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -22,13 +20,45 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bibliotecakotlin.ui.components.*
 import com.example.bibliotecakotlin.ui.theme.*
+import com.example.bibliotecakotlin.ui.viewmodel.CatalogoViewModel
+import com.example.bibliotecakotlin.ui.viewmodel.EmprestimoViewModel
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 @Composable
-fun EmprestarScreen(onConfirmar: () -> Unit) {
-    var busca by remember { mutableStateOf("Clean Code") }
-    val livro = MockData.cleanCode
+fun EmprestarScreen(
+    onConfirmar: () -> Unit,
+    catalogoVm: CatalogoViewModel = viewModel(),
+    emprestimoVm: EmprestimoViewModel = viewModel()
+) {
+    var busca by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) { catalogoVm.listar() }
+    LaunchedEffect(emprestimoVm.concluido) {
+        if (emprestimoVm.concluido) {
+            emprestimoVm.consumirResultado()
+            onConfirmar()
+        }
+    }
+
+    val termo = busca.trim()
+    val livro = catalogoVm.livros.firstOrNull {
+        termo.isNotBlank() && (
+                it.titulo.contains(termo, ignoreCase = true) ||
+                        it.isbn.contains(termo, ignoreCase = true) ||
+                        it.autor.contains(termo, ignoreCase = true)
+                )
+    }
+
+    // Prazo de devolução: hoje + 10 dias
+    val prazoTexto = remember {
+        val cal = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 10) }
+        SimpleDateFormat("d 'de' MMMM 'de' yyyy", Locale("pt", "BR")).format(cal.time)
+    }
 
     Column(Modifier.fillMaxSize().background(Background)) {
         HeaderAzul("Novo empréstimo", "Emprestar Livro")
@@ -42,33 +72,59 @@ fun EmprestarScreen(onConfirmar: () -> Unit) {
                 Icon(Icons.Outlined.QrCodeScanner, contentDescription = "Escanear", tint = Primary)
             })
 
+            emprestimoVm.mensagem?.let {
+                Spacer(Modifier.height(12.dp))
+                Text(it, color = Red, fontSize = 14.sp)
+            }
+
             Spacer(Modifier.height(24.dp))
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text("Livro selecionado", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextDark, modifier = Modifier.weight(1f))
-                Text("Encontrado", color = Green, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                Text(
+                    "Livro selecionado", fontSize = 20.sp, fontWeight = FontWeight.Bold,
+                    color = TextDark, modifier = Modifier.weight(1f)
+                )
+                if (livro != null) {
+                    Text(
+                        if (livro.disponivel) "Encontrado" else "Indisponível",
+                        color = if (livro.disponivel) Green else Red,
+                        fontWeight = FontWeight.SemiBold, fontSize = 14.sp
+                    )
+                }
             }
             Spacer(Modifier.height(12.dp))
 
-            CardBranco {
-                Row(Modifier.padding(20.dp)) {
-                    CapaLivro(livro.capaTexto, livro.capaCor, largura = 120, altura = 170, autor = livro.autor)
-                    Spacer(Modifier.width(20.dp))
-                    Column {
-                        Badge("● Disponível", Green, GreenLight)
-                        Spacer(Modifier.height(16.dp))
-                        Text(livro.titulo, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TextDark)
-                        Text(livro.autor, color = TextGray, fontSize = 16.sp)
-                        Spacer(Modifier.height(16.dp))
-                        Text("Engenharia de Software", color = TextGray, fontSize = 14.sp)
-                        Spacer(Modifier.height(6.dp))
-                        Text(livro.estante, color = TextGray, fontSize = 14.sp)
+            if (livro == null) {
+                Text(
+                    when {
+                        catalogoVm.carregando -> "Carregando..."
+                        termo.isBlank() -> "Digite o título, autor ou ISBN para buscar."
+                        else -> "Nenhum livro encontrado."
+                    },
+                    color = TextGray, fontSize = 14.sp
+                )
+            } else {
+                CardBranco {
+                    Row(Modifier.padding(20.dp)) {
+                        CapaLivro(livro.capaTexto, livro.capaCor, largura = 120, altura = 170, autor = livro.autor)
+                        Spacer(Modifier.width(20.dp))
+                        Column {
+                            if (livro.disponivel) Badge("● Disponível", Green, GreenLight)
+                            else Badge("● Indisponível", Red, RedLight)
+                            Spacer(Modifier.height(16.dp))
+                            Text(livro.titulo, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TextDark)
+                            Text(livro.autor, color = TextGray, fontSize = 16.sp)
+                            Spacer(Modifier.height(16.dp))
+                            Text(livro.categoria, color = TextGray, fontSize = 14.sp)
+                            Spacer(Modifier.height(6.dp))
+                            Text(livro.estante, color = TextGray, fontSize = 14.sp)
+                        }
                     }
-                }
-                HorizontalDivider(color = PrimaryLight)
-                Row(Modifier.fillMaxWidth().background(Background).padding(vertical = 16.dp)) {
-                    InfoColuna("ISBN", livro.isbn, Modifier.weight(1f))
-                    VerticalDivider(Modifier.height(40.dp), color = Border)
-                    InfoColuna("EDIÇÃO", livro.edicao, Modifier.weight(1f))
+                    HorizontalDivider(color = PrimaryLight)
+                    Row(Modifier.fillMaxWidth().background(Background).padding(vertical = 16.dp)) {
+                        InfoColuna("ISBN", livro.isbn, Modifier.weight(1f))
+                        VerticalDivider(Modifier.height(40.dp), color = Border)
+                        InfoColuna("EDIÇÃO", livro.edicao, Modifier.weight(1f))
+                    }
                 }
             }
 
@@ -84,14 +140,21 @@ fun EmprestarScreen(onConfirmar: () -> Unit) {
                     Spacer(Modifier.height(4.dp))
                     Text(buildAnnotatedString {
                         append("A devolução está prevista para ")
-                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("24 de setembro de 2026") }
-                        append(". Você poderá renovar pelo aplicativo.")
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(prazoTexto) }
+                        append(". O prazo é de 10 dias.")
                     }, color = Primary, fontSize = 14.sp)
                 }
             }
 
             Spacer(Modifier.height(32.dp))
-            BotaoPrimario("Confirmar Empréstimo", onClick = onConfirmar)
+            BotaoPrimario(
+                "Confirmar Empréstimo",
+                onClick = {
+                    if (livro != null && livro.disponivel && !emprestimoVm.carregando) {
+                        emprestimoVm.emprestar(livro.id)
+                    }
+                }
+            )
             Spacer(Modifier.height(12.dp))
             TextoCentralizadoCinza("Confirme apenas se o livro estiver em sua posse.")
             Spacer(Modifier.height(16.dp))

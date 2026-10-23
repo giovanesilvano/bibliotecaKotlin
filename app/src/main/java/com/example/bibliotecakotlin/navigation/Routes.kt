@@ -19,3 +19,15 @@ data object Devolver
 
 @Serializable
 data object Emprestimos
+
+@Serializable
+data object Usuarios
+
+@Serializable
+data class UsuarioEditar(val id: Long)
+
+@Serializable
+data object LivroNovo
+
+@Serializable
+data class LivroEditar(val id: Long)

@@ -1,5 +1,6 @@
 package com.example.bibliotecakotlin.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,76 +9,98 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.bibliotecakotlin.data.Livro
-import com.example.bibliotecakotlin.data.MockData
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.bibliotecakotlin.data.model.Livro
 import com.example.bibliotecakotlin.ui.components.*
 import com.example.bibliotecakotlin.ui.theme.*
+import com.example.bibliotecakotlin.ui.viewmodel.CatalogoViewModel
 
 @Composable
-fun CatalogoScreen() {
+fun CatalogoScreen(
+    onNovoLivro: () -> Unit,
+    onEditarLivro: (Long) -> Unit,
+    vm: CatalogoViewModel = viewModel()
+) {
+    val context = LocalContext.current
     var busca by remember { mutableStateOf("") }
-    var filtro by remember { mutableStateOf("Todos") }
-    val filtros = listOf("Todos", "Ciências", "Humanas", "TI")
+    var excluir by remember { mutableStateOf<Livro?>(null) }
 
-    Column(Modifier.fillMaxSize().background(Background)) {
-        HeaderAzul("Biblioteca Universitária", "Catálogo", mostrarAvatar = true)
-
-        LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            item { CampoBusca(busca, { busca = it }, "Buscar por título, autor ou ISBN") }
-
-            item {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    filtros.forEach { f ->
-                        FilterChip(
-                            selected = filtro == f,
-                            onClick = { filtro = f },
-                            label = { Text(f, fontWeight = FontWeight.SemiBold) },
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(50),
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = Primary,
-                                selectedLabelColor = androidx.compose.ui.graphics.Color.White,
-                                labelColor = Primary
-                            ),
-                            border = FilterChipDefaults.filterChipBorder(
-                                enabled = true, selected = filtro == f, borderColor = Border
-                            )
-                        )
-                    }
-                }
-            }
-
-            item {
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text("Livros em destaque", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextDark, modifier = Modifier.weight(1f))
-                    Text("248 títulos", color = TextGray, fontSize = 14.sp)
-                }
-            }
-
-            items(MockData.catalogo) { livro -> CardLivroCatalogo(livro) }
+    LaunchedEffect(Unit) { vm.listar() }
+    LaunchedEffect(vm.mensagem) {
+        vm.mensagem?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            vm.consumirMensagem()
         }
     }
-}
 
-@Composable
-private fun CardLivroCatalogo(livro: Livro) {
-    CardBranco {
-        Row(Modifier.padding(20.dp)) {
-            CapaLivro(livro.capaTexto, livro.capaCor, largura = 90, altura = 130)
-            Spacer(Modifier.width(20.dp))
-            Column(Modifier.weight(1f)) {
-                Text(livro.titulo, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = TextDark)
-                Spacer(Modifier.height(4.dp))
-                Text(livro.autor, color = TextGray, fontSize = 15.sp)
-                Spacer(Modifier.height(8.dp))
-                Text(livro.categoria, color = TextGray, fontSize = 13.sp)
-                Spacer(Modifier.weight(1f))
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    StatusDisponibilidade(livro.disponivel)
-                    Spacer(Modifier.weight(1f))
-                    Text("Ver detalhes", color = Primary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+    val termo = busca.trim()
+    val filtrados = vm.livros.filter {
+        termo.isBlank() ||
+                it.titulo.contains(termo, ignoreCase = true) ||
+                it.autor.contains(termo, ignoreCase = true) ||
+                it.categoria.contains(termo, ignoreCase = true)
+    }
+
+    excluir?.let { l ->
+        AlertDialog(
+            onDismissRequest = { excluir = null },
+            title = { Text("Excluir livro") },
+            text = { Text("Deseja excluir \"${l.titulo}\"?") },
+            confirmButton = {
+                TextButton(onClick = { vm.excluir(l.id); excluir = null }) { Text("Excluir", color = Red) }
+            },
+            dismissButton = { TextButton(onClick = { excluir = null }) { Text("Cancelar") } }
+        )
+    }
+
+    Column(Modifier.fillMaxSize().background(Background)) {
+        HeaderAzul("Acervo", "Catálogo", mostrarAvatar = true)
+
+        LazyColumn(
+            contentPadding = PaddingValues(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            item { CampoBusca(busca, { busca = it }, "Título, autor ou categoria") }
+            item { BotaoPrimario("Cadastrar livro", onClick = onNovoLivro) }
+
+            if (filtrados.isEmpty()) {
+                item {
+                    Text(
+                        if (vm.carregando) "Carregando..." else "Nenhum livro encontrado.",
+                        color = TextGray, fontSize = 14.sp
+                    )
+                }
+            }
+
+            items(filtrados, key = { it.id }) { l ->
+                CardBranco {
+                    Row(Modifier.padding(20.dp)) {
+                        CapaLivro(l.capaTexto, l.capaCor, largura = 90, altura = 130)
+                        Spacer(Modifier.width(16.dp))
+                        Column(Modifier.weight(1f)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    l.titulo, fontSize = 17.sp, fontWeight = FontWeight.Bold,
+                                    color = TextDark, modifier = Modifier.weight(1f)
+                                )
+                                if (l.disponivel) Badge("Disponível", Green, GreenLight)
+                                else Badge("Emprestado", Red, RedLight)
+                            }
+                            Text(l.autor, color = TextGray, fontSize = 14.sp)
+                            Spacer(Modifier.height(8.dp))
+                            Text(l.categoria, color = TextGray, fontSize = 13.sp)
+                            Text(l.estante, color = TextGray, fontSize = 13.sp)
+                        }
+                    }
+                    HorizontalDivider(color = PrimaryLight, modifier = Modifier.padding(horizontal = 20.dp))
+                    Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp)) {
+                        TextButton(onClick = { onEditarLivro(l.id) }) { Text("Editar", color = Primary) }
+                        TextButton(onClick = { excluir = l }) { Text("Excluir", color = Red) }
+                    }
                 }
             }
         }
