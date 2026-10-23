@@ -1,46 +1,21 @@
+// auth/AuthManager.kt
 package com.example.bibliotecakotlin.auth
 
+import java.security.SecureRandom
+import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.PBEKeySpec
+
 object AuthManager {
+    private const val ITERACOES = 120_000
+    private const val TAMANHO_BITS = 256
 
-    data class Usuario(
-        val nome: String,
-        val email: String,
-        val senha: String
-    )
+    fun criarSalt(): ByteArray = ByteArray(16).also { SecureRandom().nextBytes(it) }
 
-    private val usuarios = mutableListOf<Usuario>()
-
-    fun cadastrar(
-        nome: String,
-        email: String,
-        senha: String
-    ): Boolean {
-        val emailJaCadastrado = usuarios.any {
-            it.email.equals(email.trim(), ignoreCase = true)
-        }
-
-        if (emailJaCadastrado) {
-            return false
-        }
-
-        usuarios.add(
-            Usuario(
-                nome = nome.trim(),
-                email = email.trim(),
-                senha = senha
-            )
-        )
-
-        return true
+    fun gerarHash(senha: String, salt: ByteArray): ByteArray {
+        val spec = PBEKeySpec(senha.toCharArray(), salt, ITERACOES, TAMANHO_BITS)
+        return SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256").generateSecret(spec).encoded
     }
 
-    fun login(
-        email: String,
-        senha: String
-    ): Boolean {
-        return usuarios.any {
-            it.email.equals(email.trim(), ignoreCase = true) &&
-                    it.senha == senha
-        }
-    }
+    fun validarSenha(senha: String, salt: ByteArray, senhaDB: ByteArray): Boolean =
+        java.security.MessageDigest.isEqual(gerarHash(senha, salt), senhaDB)
 }

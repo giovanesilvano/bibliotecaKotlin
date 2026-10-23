@@ -19,6 +19,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,18 +30,36 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.bibliotecakotlin.auth.AuthManager
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.bibliotecakotlin.ui.viewmodel.AuthViewModel
 
 @Composable
 fun LoginScreen(
     onLoginSucesso: () -> Unit,
-    irParaCadastro: () -> Unit
+    irParaCadastro: () -> Unit,
+    vm: AuthViewModel = viewModel()
 ) {
     var email by remember { mutableStateOf("") }
     var senha by remember { mutableStateOf("") }
     var senhaVisivel by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+
+    // Login concluído: limpa o estado e navega
+    LaunchedEffect(vm.concluido) {
+        if (vm.concluido) {
+            vm.consumirResultado()
+            onLoginSucesso()
+        }
+    }
+
+    // Erros (credenciais inválidas, etc.)
+    LaunchedEffect(vm.mensagem) {
+        vm.mensagem?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+            vm.consumirResultado()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -66,9 +85,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = {
-                Text("E-mail")
-            },
+            label = { Text("E-mail") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
@@ -78,9 +95,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = senha,
             onValueChange = { senha = it },
-            label = {
-                Text("Senha")
-            },
+            label = { Text("Senha") },
             singleLine = true,
             visualTransformation = if (senhaVisivel) {
                 VisualTransformation.None
@@ -88,22 +103,14 @@ fun LoginScreen(
                 PasswordVisualTransformation()
             },
             trailingIcon = {
-                IconButton(
-                    onClick = {
-                        senhaVisivel = !senhaVisivel
-                    }
-                ) {
+                IconButton(onClick = { senhaVisivel = !senhaVisivel }) {
                     Icon(
                         imageVector = if (senhaVisivel) {
                             Icons.Default.Visibility
                         } else {
                             Icons.Default.VisibilityOff
                         },
-                        contentDescription = if (senhaVisivel) {
-                            "Ocultar senha"
-                        } else {
-                            "Mostrar senha"
-                        }
+                        contentDescription = if (senhaVisivel) "Ocultar senha" else "Mostrar senha"
                     )
                 }
             },
@@ -114,36 +121,19 @@ fun LoginScreen(
 
         Button(
             onClick = {
-                when {
-                    email.isBlank() || senha.isBlank() -> {
-                        Toast.makeText(
-                            context,
-                            "Preencha e-mail e senha.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-
-                    AuthManager.login(email, senha) -> {
-                        onLoginSucesso()
-                    }
-
-                    else -> {
-                        Toast.makeText(
-                            context,
-                            "E-mail ou senha inválidos.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
+                if (email.isBlank() || senha.isBlank()) {
+                    Toast.makeText(context, "Preencha e-mail e senha.", Toast.LENGTH_SHORT).show()
+                } else {
+                    vm.login(email, senha)
                 }
             },
+            enabled = !vm.carregando,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Entrar")
+            Text(if (vm.carregando) "Entrando..." else "Entrar")
         }
 
-        TextButton(
-            onClick = irParaCadastro
-        ) {
+        TextButton(onClick = irParaCadastro) {
             Text("Não possui uma conta? Cadastre-se")
         }
     }

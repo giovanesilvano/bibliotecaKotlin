@@ -7,8 +7,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.bibliotecakotlin.ui.components.BottomNav
 import com.example.bibliotecakotlin.ui.components.Tela
 import com.example.bibliotecakotlin.ui.screens.CadastroScreen
@@ -17,6 +19,8 @@ import com.example.bibliotecakotlin.ui.screens.DevolverScreen
 import com.example.bibliotecakotlin.ui.screens.EmprestarScreen
 import com.example.bibliotecakotlin.ui.screens.EmprestimosScreen
 import com.example.bibliotecakotlin.ui.screens.LoginScreen
+import com.example.bibliotecakotlin.ui.screens.UsuarioEditarScreen
+import com.example.bibliotecakotlin.ui.screens.UsuariosScreen
 
 @Composable
 fun AppNavigation(
@@ -26,6 +30,24 @@ fun AppNavigation(
         navController = navController,
         startDestination = Login
     ) {
+        composable(USUARIOS) {
+            UsuariosScreen(
+                onEditar = { navController.navigate(usuarioEditar(it)) },
+                onNovo = { navController.navigate("cadastro") }, // use o nome da sua rota de cadastro
+                onVoltar = { navController.popBackStack() }
+            )
+        }
+        composable(
+            USUARIO_EDITAR,
+            arguments = listOf(navArgument("id") { type = NavType.LongType })
+        ) { entry ->
+            UsuarioEditarScreen(
+                id = entry.arguments!!.getLong("id"),
+                onSalvo = { navController.popBackStack() },
+                onVoltar = { navController.popBackStack() }
+            )
+        }
+
         composable<Login> {
             LoginScreen(
                 onLoginSucesso = {

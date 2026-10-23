@@ -2,6 +2,10 @@ package com.example.bibliotecakotlin.navigation
 
 import kotlinx.serialization.Serializable
 
+const val USUARIOS = "usuarios"
+const val USUARIO_EDITAR = "usuarioEditar/{id}"
+fun usuarioEditar(id: Long) = "usuarioEditar/$id"
+
 @Serializable
 data object Login
 

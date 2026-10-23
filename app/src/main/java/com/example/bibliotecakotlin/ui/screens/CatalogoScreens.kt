@@ -11,8 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.bibliotecakotlin.data.Livro
-import com.example.bibliotecakotlin.data.MockData
+import com.example.bibliotecakotlin.data.model.Livro
 import com.example.bibliotecakotlin.ui.components.*
 import com.example.bibliotecakotlin.ui.theme.*
 
@@ -56,7 +55,6 @@ fun CatalogoScreen() {
                 }
             }
 
-            items(MockData.catalogo) { livro -> CardLivroCatalogo(livro) }
         }
     }
 }
