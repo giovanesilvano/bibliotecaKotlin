@@ -14,9 +14,9 @@ internal class LivroDao(context: Context) {
 
     private val select = """
         SELECT l.id, l.titulo, l.autor, l.categoria, l.capa_texto,
-               l.isbn, l.edicao, l.estante,
-               NOT EXISTS(SELECT 1 FROM emprestimos e
-                          WHERE e.livro_id = l.id AND e.devolvido_em IS NULL) AS disponivel
+               l.isbn, l.edicao, l.estante, l.quantidade,
+               (l.quantidade - (SELECT COUNT(*) FROM emprestimos e
+                                WHERE e.livro_id = l.id AND e.devolvido_em IS NULL)) AS disponiveis
         FROM livros l
     """.trimIndent()
 
@@ -45,7 +45,7 @@ internal class LivroDao(context: Context) {
             "SELECT 1 FROM emprestimos WHERE livro_id = ? AND devolvido_em IS NULL",
             arrayOf(id.toString())
         ).use { it.moveToFirst() }
-        if (emprestado) throw IllegalStateException("Este livro está emprestado e não pode ser excluído.")
+        if (emprestado) throw IllegalStateException("Este livro possui empréstimos ativos e não pode ser excluído.")
         helper.writableDatabase.delete("livros", "id = ?", arrayOf(id.toString()))
     }
 
@@ -57,22 +57,28 @@ internal class LivroDao(context: Context) {
         put("isbn", l.isbn)
         put("edicao", l.edicao)
         put("estante", l.estante)
+        put("quantidade", l.quantidade)
     }
 
-    private fun android.database.Cursor.paraLivro() = Livro(
-        id = getLong(0),
-        titulo = getString(1),
-        autor = getString(2),
-        categoria = getString(3),
-        capaTexto = getString(4),
-        capaCor = corPadrao,
-        isbn = getString(5),
-        edicao = getString(6),
-        estante = getString(7),
-        disponivel = getInt(8) == 1
-    )
+    private fun android.database.Cursor.paraLivro(): Livro {
+        val total = getInt(8)
+        val disponiveis = getInt(9)
+        return Livro(
+            id = getLong(0),
+            titulo = getString(1),
+            autor = getString(2),
+            categoria = getString(3),
+            capaTexto = getString(4),
+            capaCor = corPadrao,
+            isbn = getString(5),
+            edicao = getString(6),
+            estante = getString(7),
+            quantidade = total,
+            quantidadeDisponivel = maxOf(0, disponiveis),
+            disponivel = disponiveis > 0
+        )
+    }
 
-    // Livros de exemplo, inseridos uma única vez
     private fun semearSeNecessario() {
         val prefs = appContext.getSharedPreferences("biblioteca", Context.MODE_PRIVATE)
         if (prefs.getBoolean("seed_livros", false)) return
@@ -81,13 +87,13 @@ internal class LivroDao(context: Context) {
         if (vazio) {
             listOf(
                 Livro(titulo = "Clean Code", autor = "Robert C. Martin", categoria = "Tecnologia",
-                    capaTexto = "CC", capaCor = corPadrao, isbn = "9780132350884", edicao = "1ª", estante = "A1"),
+                    capaTexto = "CC", capaCor = corPadrao, isbn = "9780132350884", edicao = "1ª", estante = "A1", quantidade = 3, quantidadeDisponivel = 3),
                 Livro(titulo = "Dom Casmurro", autor = "Machado de Assis", categoria = "Romance",
-                    capaTexto = "DC", capaCor = corPadrao, isbn = "9788535910663", edicao = "2ª", estante = "B2"),
+                    capaTexto = "DC", capaCor = corPadrao, isbn = "9788535910663", edicao = "2ª", estante = "B2", quantidade = 2, quantidadeDisponivel = 2),
                 Livro(titulo = "Sociologia", autor = "Anthony Giddens", categoria = "Ciências Sociais",
-                    capaTexto = "SO", capaCor = corPadrao, isbn = "9788584290413", edicao = "6ª", estante = "C3"),
+                    capaTexto = "SO", capaCor = corPadrao, isbn = "9788584290413", edicao = "6ª", estante = "C3", quantidade = 4, quantidadeDisponivel = 4),
                 Livro(titulo = "O Pequeno Príncipe", autor = "Antoine de Saint-Exupéry", categoria = "Infantil",
-                    capaTexto = "PP", capaCor = corPadrao, isbn = "9788522008731", edicao = "1ª", estante = "D4")
+                    capaTexto = "PP", capaCor = corPadrao, isbn = "9788522008731", edicao = "1ª", estante = "D4", quantidade = 5, quantidadeDisponivel = 5)
             ).forEach { inserir(it) }
         }
         prefs.edit().putBoolean("seed_livros", true).apply()

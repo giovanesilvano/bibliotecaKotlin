@@ -16,18 +16,24 @@ import java.util.concurrent.TimeUnit
 internal class EmprestimoDao(context: Context) {
     private val helper = AppDatabase(context)
     private val fmt = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
+    private val corPadrao = Color(0xFF1E88E5)
 
     fun emprestar(usuarioId: Long, livroId: Long, prazoDias: Int = 10): Long {
         val db = helper.writableDatabase
         db.beginTransaction()
         try {
-            db.rawQuery(
+            val ativos = db.rawQuery(
                 "SELECT COUNT(*) FROM emprestimos WHERE livro_id = ? AND devolvido_em IS NULL",
                 arrayOf(livroId.toString())
-            ).use { c ->
-                c.moveToFirst()
-                check(c.getInt(0) == 0) { "Livro indisponível" }
-            }
+            ).use { c -> if (c.moveToFirst()) c.getInt(0) else 0 }
+
+            val total = db.rawQuery(
+                "SELECT quantidade FROM livros WHERE id = ?",
+                arrayOf(livroId.toString())
+            ).use { c -> if (c.moveToFirst()) c.getInt(0) else 0 }
+
+            check(total > 0 && ativos < total) { "Livro indisponível" }
+
             val agora = System.currentTimeMillis()
             val v = ContentValues().apply {
                 put("usuario_id", usuarioId)
@@ -57,8 +63,8 @@ internal class EmprestimoDao(context: Context) {
         val lista = mutableListOf<Emprestimo>()
         helper.readableDatabase.rawQuery(
             """SELECT e.id, e.usuario_id, e.emprestado_em, e.devolver_ate, e.devolvido_em,
-                      l.id, l.titulo, l.autor, l.categoria, l.capa_texto, l.capa_cor,
-                      l.isbn, l.edicao, l.estante
+                      l.id, l.titulo, l.autor, l.categoria, l.capa_texto,
+                      l.isbn, l.edicao, l.estante, l.quantidade
                FROM emprestimos e JOIN livros l ON l.id = e.livro_id
                WHERE e.usuario_id = ?
                ORDER BY e.emprestado_em DESC""",
@@ -80,10 +86,17 @@ internal class EmprestimoDao(context: Context) {
                     StatusEmprestimo.EM_DIA -> "Faltam $dias dia(s)"
                 }
                 val livro = Livro(
-                    id = c.getLong(5), titulo = c.getString(6), autor = c.getString(7),
-                    categoria = c.getString(8), capaTexto = c.getString(9),
-                    capaCor = Color(c.getInt(10)), isbn = c.getString(11),
-                    edicao = c.getString(12), estante = c.getString(13),
+                    id = c.getLong(5),
+                    titulo = c.getString(6),
+                    autor = c.getString(7),
+                    categoria = c.getString(8),
+                    capaTexto = c.getString(9),
+                    capaCor = corPadrao,
+                    isbn = c.getString(10),
+                    edicao = c.getString(11),
+                    estante = c.getString(12),
+                    quantidade = c.getInt(13),
+                    quantidadeDisponivel = c.getInt(13),
                     disponivel = devolvidoEm != null
                 )
                 lista.add(

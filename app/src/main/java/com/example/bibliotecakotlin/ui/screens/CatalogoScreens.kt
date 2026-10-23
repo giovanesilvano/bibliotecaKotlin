@@ -87,8 +87,8 @@ fun CatalogoScreen(
                                     l.titulo, fontSize = 17.sp, fontWeight = FontWeight.Bold,
                                     color = TextDark, modifier = Modifier.weight(1f)
                                 )
-                                if (l.disponivel) Badge("Disponível", Green, GreenLight)
-                                else Badge("Emprestado", Red, RedLight)
+                                if (l.disponivel) Badge("Disponível (${l.quantidadeDisponivel}/${l.quantidade})", Green, GreenLight)
+                                else Badge("Esgotado", Red, RedLight)
                             }
                             Text(l.autor, color = TextGray, fontSize = 14.sp)
                             Spacer(Modifier.height(8.dp))

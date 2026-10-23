@@ -50,12 +50,14 @@ class CatalogoViewModel(app: Application) : AndroidViewModel(app) {
 
     fun salvar(
         id: Long, titulo: String, autor: String, categoria: String,
-        isbn: String, edicao: String, estante: String, capaCor: Color
+        isbn: String, edicao: String, estante: String, quantidade: Int = 1,
+        capaCor: Color = Color(0xFF1E88E5)
     ) {
         if (titulo.isBlank() || autor.isBlank() || categoria.isBlank()) {
             mensagem = "Informe título, autor e categoria."
             return
         }
+        val qtd = if (quantidade > 0) quantidade else 1
         viewModelScope.launch {
             carregando = true
             try {
@@ -68,7 +70,9 @@ class CatalogoViewModel(app: Application) : AndroidViewModel(app) {
                     capaCor = capaCor,
                     isbn = isbn.trim().ifBlank { "S/N" },
                     edicao = edicao.trim().ifBlank { "-" },
-                    estante = estante.trim().ifBlank { "-" }
+                    estante = estante.trim().ifBlank { "-" },
+                    quantidade = qtd,
+                    quantidadeDisponivel = qtd
                 )
                 withContext(Dispatchers.IO) { if (id == 0L) dao.inserir(l) else dao.atualizar(l) }
                 salvo = true

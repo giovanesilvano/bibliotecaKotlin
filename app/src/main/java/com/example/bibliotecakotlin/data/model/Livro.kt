@@ -13,5 +13,7 @@ data class Livro(
     val disponivel: Boolean = true,
     val isbn: String,
     val edicao: String,
-    val estante: String
+    val estante: String,
+    val quantidade: Int = 1,
+    val quantidadeDisponivel: Int = 1
 )
