@@ -108,8 +108,8 @@ fun EmprestarScreen(
                         CapaLivro(livro.capaTexto, livro.capaCor, largura = 120, altura = 170, autor = livro.autor)
                         Spacer(Modifier.width(20.dp))
                         Column {
-                            if (livro.disponivel) Badge("● Disponível", Green, GreenLight)
-                            else Badge("● Indisponível", Red, RedLight)
+                            if (livro.disponivel) Badge("● Disponível (${livro.quantidadeDisponivel}/${livro.quantidade})", Green, GreenLight)
+                            else Badge("● Esgotado", Red, RedLight)
                             Spacer(Modifier.height(16.dp))
                             Text(livro.titulo, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TextDark)
                             Text(livro.autor, color = TextGray, fontSize = 16.sp)
@@ -124,6 +124,8 @@ fun EmprestarScreen(
                         InfoColuna("ISBN", livro.isbn, Modifier.weight(1f))
                         VerticalDivider(Modifier.height(40.dp), color = Border)
                         InfoColuna("EDIÇÃO", livro.edicao, Modifier.weight(1f))
+                        VerticalDivider(Modifier.height(40.dp), color = Border)
+                        InfoColuna("DISPONÍVEIS", "${livro.quantidadeDisponivel}/${livro.quantidade}", Modifier.weight(1f))
                     }
                 }
             }

@@ -10,7 +10,7 @@ internal class AppDatabase(context: Context) : SQLiteOpenHelper(
     context.applicationContext,
     File(context.noBackupFilesDir, "biblioteca.db").absolutePath,
     null,
-    2
+    3
 ) {
     override fun onConfigure(db: SQLiteDatabase) {
         db.setForeignKeyConstraintsEnabled(true)
@@ -38,7 +38,8 @@ internal class AppDatabase(context: Context) : SQLiteOpenHelper(
                 capa_texto TEXT NOT NULL,
                 isbn TEXT NOT NULL,
                 edicao TEXT NOT NULL,
-                estante TEXT NOT NULL
+                estante TEXT NOT NULL,
+                quantidade INTEGER NOT NULL DEFAULT 1
             )
             """.trimIndent()
         )
