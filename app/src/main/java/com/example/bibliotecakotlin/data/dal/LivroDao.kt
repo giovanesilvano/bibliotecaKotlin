@@ -3,7 +3,6 @@ package com.example.bibliotecakotlin.data.dal
 import android.content.ContentValues
 import android.content.Context
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import com.example.bibliotecakotlin.data.local.AppDatabase
 import com.example.bibliotecakotlin.data.model.Livro
 
@@ -11,8 +10,10 @@ internal class LivroDao(context: Context) {
     private val appContext = context.applicationContext
     private val helper = AppDatabase(appContext)
 
+    private val corPadrao = Color(0xFF1E88E5)
+
     private val select = """
-        SELECT l.id, l.titulo, l.autor, l.categoria, l.capa_texto, l.capa_cor,
+        SELECT l.id, l.titulo, l.autor, l.categoria, l.capa_texto,
                l.isbn, l.edicao, l.estante,
                NOT EXISTS(SELECT 1 FROM emprestimos e
                           WHERE e.livro_id = l.id AND e.devolvido_em IS NULL) AS disponivel
@@ -53,7 +54,6 @@ internal class LivroDao(context: Context) {
         put("autor", l.autor)
         put("categoria", l.categoria)
         put("capa_texto", l.capaTexto)
-        put("capa_cor", l.capaCor.toArgb())
         put("isbn", l.isbn)
         put("edicao", l.edicao)
         put("estante", l.estante)
@@ -65,11 +65,11 @@ internal class LivroDao(context: Context) {
         autor = getString(2),
         categoria = getString(3),
         capaTexto = getString(4),
-        capaCor = Color(getInt(5)),
-        isbn = getString(6),
-        edicao = getString(7),
-        estante = getString(8),
-        disponivel = getInt(9) == 1
+        capaCor = corPadrao,
+        isbn = getString(5),
+        edicao = getString(6),
+        estante = getString(7),
+        disponivel = getInt(8) == 1
     )
 
     // Livros de exemplo, inseridos uma única vez
@@ -80,15 +80,14 @@ internal class LivroDao(context: Context) {
             .use { it.moveToFirst() && it.getInt(0) == 0 }
         if (vazio) {
             listOf(
-                Livro(titulo = "Clean Code", autor = "Robert C. Martin", categoria = "Engenharia de Software",
-                    capaTexto = "CLEAN CODE", capaCor = Color(0xFF1E3A8A), isbn = "000-0000000001",
-                    edicao = "1ª edição", estante = "Estante A1"),
-                Livro(titulo = "Dom Casmurro", autor = "Machado de Assis", categoria = "Literatura",
-                    capaTexto = "DOM CASMURRO", capaCor = Color(0xFF7C2D12), isbn = "000-0000000002", edicao = "3ª edição", estante = "Estante B2"),
-                Livro(titulo = "Sapiens", autor = "Yuval Noah Harari", categoria = "História",
-                    capaTexto = "SAPIENS", capaCor = Color(0xFF166534), isbn = "000-0000000003", edicao = "2ª edição", estante = "Estante C1"),
+                Livro(titulo = "Clean Code", autor = "Robert C. Martin", categoria = "Tecnologia",
+                    capaTexto = "CC", capaCor = corPadrao, isbn = "9780132350884", edicao = "1ª", estante = "A1"),
+                Livro(titulo = "Dom Casmurro", autor = "Machado de Assis", categoria = "Romance",
+                    capaTexto = "DC", capaCor = corPadrao, isbn = "9788535910663", edicao = "2ª", estante = "B2"),
+                Livro(titulo = "Sociologia", autor = "Anthony Giddens", categoria = "Ciências Sociais",
+                    capaTexto = "SO", capaCor = corPadrao, isbn = "9788584290413", edicao = "6ª", estante = "C3"),
                 Livro(titulo = "O Pequeno Príncipe", autor = "Antoine de Saint-Exupéry", categoria = "Infantil",
-                    capaTexto = "PEQUENO PRÍNCIPE", capaCor = Color(0xFF6B21A8), isbn = "000-0000000004", edicao = "1ª edição", estante = "Estante D3")
+                    capaTexto = "PP", capaCor = corPadrao, isbn = "9788522008731", edicao = "1ª", estante = "D4")
             ).forEach { inserir(it) }
         }
         prefs.edit().putBoolean("seed_livros", true).apply()
