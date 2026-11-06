@@ -72,5 +72,18 @@ class EmprestimoViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    fun cancelar(emprestimoId: Long) {
+        viewModelScope.launch {
+            carregando = true
+            try {
+                withContext(Dispatchers.IO) {
+                    emprestimoDao.cancelar(emprestimoId, SessaoUsuario.exigirUsuario())
+                }
+                listar()
+            } catch (e: Exception) { mensagem = e.message ?: "Erro ao cancelar" }
+            finally { carregando = false }
+        }
+    }
+
     fun consumirResultado() { concluido = false; mensagem = null }
 }

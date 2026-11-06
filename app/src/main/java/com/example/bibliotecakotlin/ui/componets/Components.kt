@@ -9,22 +9,25 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.AssignmentReturn
 import androidx.compose.material.icons.outlined.LibraryBooks
 import androidx.compose.material.icons.outlined.MenuBook
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.example.bibliotecakotlin.ui.theme.*
 
-enum class Tela { LOGIN, CATALOGO, EMPRESTAR, DEVOLVER, EMPRESTIMOS }
+enum class Tela { LOGIN, CATALOGO, EMPRESTAR, DEVOLVER, EMPRESTIMOS, AVALIACOES }
 
 @Composable
-fun HeaderAzul(subtitulo: String, titulo: String, mostrarAvatar: Boolean = false) {
+fun HeaderAzul(subtitulo: String, titulo: String, mostrarAvatar: Boolean = false, onSair: (() -> Unit)? = null) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -37,7 +40,11 @@ fun HeaderAzul(subtitulo: String, titulo: String, mostrarAvatar: Boolean = false
             Text(subtitulo, color = Color.White.copy(alpha = 0.8f), fontSize = 13.sp)
             Text(titulo, color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Bold)
         }
-        if (mostrarAvatar) {
+        if (onSair != null) {
+            TextButton(onClick = onSair) {
+                Text("Sair", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+            }
+        } else if (mostrarAvatar) {
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -55,7 +62,8 @@ fun BottomNav(telaAtual: Tela, onNavigate: (Tela) -> Unit) {
             Triple(Tela.CATALOGO, "Catálogo", Icons.Outlined.MenuBook),
             Triple(Tela.EMPRESTAR, "Emprestar", Icons.Filled.Add),
             Triple(Tela.DEVOLVER, "Devolver", Icons.Outlined.AssignmentReturn),
-            Triple(Tela.EMPRESTIMOS, "Empréstimos", Icons.Outlined.LibraryBooks)
+            Triple(Tela.EMPRESTIMOS, "Empréstimos", Icons.Outlined.LibraryBooks),
+            Triple(Tela.AVALIACOES, "Avaliações", Icons.Outlined.StarOutline)
         )
         itens.forEach { (tela, label, icone) ->
             NavigationBarItem(
@@ -76,7 +84,18 @@ fun BottomNav(telaAtual: Tela, onNavigate: (Tela) -> Unit) {
 }
 
 @Composable
-fun CapaLivro(texto: String, cor: Color, largura: Int = 80, altura: Int = 120, autor: String? = null) {
+fun CapaLivro(texto: String, cor: Color, largura: Int = 80, altura: Int = 120, autor: String? = null, imagem: ByteArray? = null) {
+    if (imagem != null) {
+        AsyncImage(
+            model = imagem,
+            contentDescription = texto,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(largura.dp, altura.dp)
+                .clip(RoundedCornerShape(8.dp))
+        )
+        return
+    }
     Box(
         modifier = Modifier
             .size(largura.dp, altura.dp)

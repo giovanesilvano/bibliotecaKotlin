@@ -9,6 +9,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,10 +29,24 @@ import com.example.bibliotecakotlin.ui.viewmodel.EmprestimoViewModel
 
 @Composable
 fun EmprestimosScreen(vm: EmprestimoViewModel = viewModel()) {
+    var cancelar by remember { mutableStateOf<Emprestimo?>(null) }
+
     LaunchedEffect(Unit) { vm.listar() }
 
     val ativos = vm.emprestimos.filter { it.status != StatusEmprestimo.DEVOLVIDO }
     val atrasados = ativos.count { it.status == StatusEmprestimo.ATRASADO }
+
+    cancelar?.let { e ->
+        AlertDialog(
+            onDismissRequest = { cancelar = null },
+            title = { Text("Cancelar empréstimo") },
+            text = { Text("Deseja cancelar o empréstimo de \"${e.livro.titulo}\"?") },
+            confirmButton = {
+                TextButton(onClick = { vm.cancelar(e.id); cancelar = null }) { Text("Cancelar empréstimo", color = Red) }
+            },
+            dismissButton = { TextButton(onClick = { cancelar = null }) { Text("Voltar") } }
+        )
+    }
 
     Column(Modifier.fillMaxSize().background(Background)) {
         HeaderAzul("Sua biblioteca", "Meus Empréstimos", mostrarAvatar = true)
@@ -57,7 +75,7 @@ fun EmprestimosScreen(vm: EmprestimoViewModel = viewModel()) {
                     )
                 }
             }
-            items(ativos, key = { it.id }) { CardEmprestimo(it) }
+            items(ativos, key = { it.id }) { e -> CardEmprestimo(e, onCancelar = { cancelar = e }) }
         }
     }
 }
@@ -73,7 +91,7 @@ private fun CardResumo(numero: String, rotulo: String, cor: Color, fundo: Color,
 }
 
 @Composable
-private fun CardEmprestimo(e: Emprestimo) {
+private fun CardEmprestimo(e: Emprestimo, onCancelar: () -> Unit) {
     val atrasado = e.status == StatusEmprestimo.ATRASADO
     CardBranco {
         Row(Modifier.padding(20.dp)) {
@@ -102,6 +120,10 @@ private fun CardEmprestimo(e: Emprestimo) {
         Row(Modifier.fillMaxWidth().padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(e.infoPrazo, color = if (atrasado) Red else Green, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, modifier = Modifier.weight(1f))
             Text(if (atrasado) "Ver detalhes" else "Prazo: 10 dias", color = Primary, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+        }
+        HorizontalDivider(color = PrimaryLight, modifier = Modifier.padding(horizontal = 20.dp))
+        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp)) {
+            TextButton(onClick = onCancelar) { Text("Cancelar", color = Red) }
         }
     }
 }

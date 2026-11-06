@@ -59,6 +59,15 @@ internal class EmprestimoDao(context: Context) {
         check(linhas > 0) { "Empréstimo não encontrado ou já devolvido" }
     }
 
+    fun cancelar(emprestimoId: Long, usuarioId: Long) {
+        val linhas = helper.writableDatabase.delete(
+            "emprestimos",
+            "id = ? AND usuario_id = ? AND devolvido_em IS NULL",
+            arrayOf(emprestimoId.toString(), usuarioId.toString())
+        )
+        check(linhas > 0) { "Empréstimo não encontrado ou já devolvido" }
+    }
+
     fun listarPorUsuario(usuarioId: Long): List<Emprestimo> {
         val lista = mutableListOf<Emprestimo>()
         helper.readableDatabase.rawQuery(

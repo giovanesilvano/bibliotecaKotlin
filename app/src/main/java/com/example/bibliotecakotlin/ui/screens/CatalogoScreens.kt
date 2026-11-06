@@ -23,6 +23,8 @@ import com.example.bibliotecakotlin.ui.viewmodel.CatalogoViewModel
 fun CatalogoScreen(
     onNovoLivro: () -> Unit,
     onEditarLivro: (Long) -> Unit,
+    onAvaliarLivro: (Long) -> Unit,
+    onSair: () -> Unit,
     vm: CatalogoViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -58,7 +60,7 @@ fun CatalogoScreen(
     }
 
     Column(Modifier.fillMaxSize().background(Background)) {
-        HeaderAzul("Acervo", "Catálogo", mostrarAvatar = true)
+        HeaderAzul("Acervo", "Catálogo", mostrarAvatar = true, onSair = onSair)
 
         LazyColumn(
             contentPadding = PaddingValues(20.dp),
@@ -79,7 +81,7 @@ fun CatalogoScreen(
             items(filtrados, key = { it.id }) { l ->
                 CardBranco {
                     Row(Modifier.padding(20.dp)) {
-                        CapaLivro(l.capaTexto, l.capaCor, largura = 90, altura = 130)
+                        CapaLivro(l.capaTexto, l.capaCor, largura = 90, altura = 130, imagem = l.capa)
                         Spacer(Modifier.width(16.dp))
                         Column(Modifier.weight(1f)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -99,6 +101,7 @@ fun CatalogoScreen(
                     HorizontalDivider(color = PrimaryLight, modifier = Modifier.padding(horizontal = 20.dp))
                     Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp)) {
                         TextButton(onClick = { onEditarLivro(l.id) }) { Text("Editar", color = Primary) }
+                        TextButton(onClick = { onAvaliarLivro(l.id) }) { Text("Avaliar", color = Primary) }
                         TextButton(onClick = { excluir = l }) { Text("Excluir", color = Red) }
                     }
                 }

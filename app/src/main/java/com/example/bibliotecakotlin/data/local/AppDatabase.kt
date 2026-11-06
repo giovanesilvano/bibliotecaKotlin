@@ -10,7 +10,7 @@ internal class AppDatabase(context: Context) : SQLiteOpenHelper(
     context.applicationContext,
     File(context.noBackupFilesDir, "biblioteca.db").absolutePath,
     null,
-    3
+    4
 ) {
     override fun onConfigure(db: SQLiteDatabase) {
         db.setForeignKeyConstraintsEnabled(true)
@@ -24,7 +24,14 @@ internal class AppDatabase(context: Context) : SQLiteOpenHelper(
                 nome TEXT NOT NULL CHECK(length(nome) BETWEEN 3 AND 100),
                 email TEXT NOT NULL UNIQUE CHECK(length(email) BETWEEN 3 AND 254),
                 senha BLOB NOT NULL,
-                salt BLOB NOT NULL
+                salt BLOB NOT NULL,
+                cep TEXT NOT NULL DEFAULT '',
+                rua TEXT NOT NULL DEFAULT '',
+                numero TEXT NOT NULL DEFAULT '',
+                complemento TEXT NOT NULL DEFAULT '',
+                bairro TEXT NOT NULL DEFAULT '',
+                cidade TEXT NOT NULL DEFAULT '',
+                uf TEXT NOT NULL DEFAULT ''
             )
             """.trimIndent()
         )
@@ -39,7 +46,8 @@ internal class AppDatabase(context: Context) : SQLiteOpenHelper(
                 isbn TEXT NOT NULL,
                 edicao TEXT NOT NULL,
                 estante TEXT NOT NULL,
-                quantidade INTEGER NOT NULL DEFAULT 1
+                quantidade INTEGER NOT NULL DEFAULT 1,
+                capa BLOB
             )
             """.trimIndent()
         )
@@ -57,10 +65,26 @@ internal class AppDatabase(context: Context) : SQLiteOpenHelper(
             )
             """.trimIndent()
         )
+        db.execSQL(
+            """
+            CREATE TABLE avaliacoes(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario_id INTEGER NOT NULL,
+                livro_id INTEGER NOT NULL,
+                nota INTEGER NOT NULL CHECK(nota BETWEEN 1 AND 5),
+                comentario TEXT NOT NULL,
+                criado_em INTEGER NOT NULL,
+                UNIQUE(usuario_id, livro_id),
+                FOREIGN KEY(usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+                FOREIGN KEY(livro_id) REFERENCES livros(id) ON DELETE CASCADE
+            )
+            """.trimIndent()
+        )
         // Os livros de exemplo são inseridos pelo LivroDao (semearSeNecessario).
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        db.execSQL("DROP TABLE IF EXISTS avaliacoes")
         db.execSQL("DROP TABLE IF EXISTS emprestimos")
         db.execSQL("DROP TABLE IF EXISTS livros")
         db.execSQL("DROP TABLE IF EXISTS usuarios")

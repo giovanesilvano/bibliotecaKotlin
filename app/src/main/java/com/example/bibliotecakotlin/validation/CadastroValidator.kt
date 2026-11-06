@@ -16,4 +16,12 @@ object CadastroValidator {
         }
         return null
     }
+
+    fun validarEndereco(cep: String, rua: String, numero: String, bairro: String, cidade: String, uf: String): String? {
+        if (!Regex("[0-9]{5}-?[0-9]{3}").matches(cep.trim())) return "Informe um CEP válido"
+        if (rua.isBlank() || numero.isBlank() || bairro.isBlank() || cidade.isBlank() || uf.isBlank()) {
+            return "Preencha o endereço completo"
+        }
+        return null
+    }
 }
