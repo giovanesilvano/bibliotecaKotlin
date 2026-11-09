@@ -1,4 +1,3 @@
-// data/dal/UsuarioDao.kt
 package com.example.bibliotecakotlin.data.dal
 
 import android.content.ContentValues

@@ -2,15 +2,15 @@ package com.example.bibliotecakotlin.data.dal
 
 import android.content.ContentValues
 import android.content.Context
-import androidx.compose.ui.graphics.Color
 import com.example.bibliotecakotlin.data.local.AppDatabase
 import com.example.bibliotecakotlin.data.model.Livro
+import com.example.bibliotecakotlin.ui.theme.Blue
 
 internal class LivroDao(context: Context) {
     private val appContext = context.applicationContext
     private val helper = AppDatabase(appContext)
 
-    private val corPadrao = Color(0xFF1E88E5)
+    private val corPadrao = Blue
 
     private val select = """
         SELECT l.id, l.titulo, l.autor, l.categoria, l.capa_texto,

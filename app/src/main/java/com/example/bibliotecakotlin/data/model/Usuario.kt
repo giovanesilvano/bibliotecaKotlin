@@ -1,4 +1,3 @@
-// data/model/Usuario.kt
 package com.example.bibliotecakotlin.data.model
 
 data class Usuario(

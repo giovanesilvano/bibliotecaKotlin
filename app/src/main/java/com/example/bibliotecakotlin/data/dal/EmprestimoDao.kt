@@ -1,13 +1,12 @@
-// data/dal/EmprestimoDao.kt
 package com.example.bibliotecakotlin.data.dal
 
 import android.content.ContentValues
 import android.content.Context
-import androidx.compose.ui.graphics.Color
 import com.example.bibliotecakotlin.data.local.AppDatabase
 import com.example.bibliotecakotlin.data.model.Emprestimo
 import com.example.bibliotecakotlin.data.model.Livro
 import com.example.bibliotecakotlin.data.model.StatusEmprestimo
+import com.example.bibliotecakotlin.ui.theme.Blue
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -16,7 +15,7 @@ import java.util.concurrent.TimeUnit
 internal class EmprestimoDao(context: Context) {
     private val helper = AppDatabase(context)
     private val fmt = SimpleDateFormat("dd/MM/yyyy", Locale("pt", "BR"))
-    private val corPadrao = Color(0xFF1E88E5)
+    private val corPadrao = Blue
 
     fun emprestar(usuarioId: Long, livroId: Long, prazoDias: Int = 10): Long {
         val db = helper.writableDatabase

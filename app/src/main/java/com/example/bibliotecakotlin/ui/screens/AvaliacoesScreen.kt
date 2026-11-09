@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -23,9 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bibliotecakotlin.data.model.Avaliacao
 import com.example.bibliotecakotlin.ui.components.CardBranco
@@ -71,30 +70,30 @@ fun AvaliacoesScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             model.mensagem?.let { mensagem ->
-                item { Text(mensagem, color = Red, fontSize = 14.sp) }
+                item { Text(mensagem, color = Red, style = MaterialTheme.typography.bodyMedium) }
             }
             if (model.avaliacoes.isEmpty()) {
                 item {
                     Text(
                         if (model.carregando) "Carregando..." else "Você ainda não avaliou nenhum livro.",
                         color = TextGray,
-                        fontSize = 14.sp
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }
             items(model.avaliacoes, key = { it.id }) { avaliacao ->
                 CardBranco {
                     Column(Modifier.padding(20.dp)) {
-                        Text(avaliacao.livroTitulo, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = TextDark)
+                        Text(avaliacao.livroTitulo, style = MaterialTheme.typography.titleMedium, color = TextDark)
                         Text(
                             "★".repeat(avaliacao.nota) + "☆".repeat(5 - avaliacao.nota),
                             color = Orange,
-                            fontSize = 20.sp
+                            style = MaterialTheme.typography.titleLarge
                         )
                         Spacer(Modifier.height(8.dp))
-                        Text(avaliacao.comentario, color = TextDark, fontSize = 14.sp)
+                        Text(avaliacao.comentario, color = TextDark, style = MaterialTheme.typography.bodyMedium)
                         Spacer(Modifier.height(8.dp))
-                        Text("Avaliado em ${avaliacao.criadoEm}", color = TextLight, fontSize = 12.sp)
+                        Text("Avaliado em ${avaliacao.criadoEm}", color = TextLight, style = MaterialTheme.typography.bodySmall)
                     }
                     HorizontalDivider(color = PrimaryLight, modifier = Modifier.padding(horizontal = 20.dp))
                     Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp)) {

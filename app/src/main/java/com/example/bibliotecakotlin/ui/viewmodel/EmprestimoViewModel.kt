@@ -1,4 +1,3 @@
-// ui/viewmodel/EmprestimoViewModel.kt
 package com.example.bibliotecakotlin.ui.viewmodel
 
 import android.app.Application

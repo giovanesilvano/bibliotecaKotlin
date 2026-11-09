@@ -12,13 +12,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.example.bibliotecakotlin.ui.components.*
@@ -40,7 +37,7 @@ fun LivroFormScreen(
     var edicao by remember { mutableStateOf("") }
     var estante by remember { mutableStateOf("") }
     var quantidade by remember { mutableStateOf("1") }
-    var capaCor by remember { mutableStateOf(Color(0xFF1E88E5)) }
+    var capaCor by remember { mutableStateOf(Blue) }
 
     val galeria = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
@@ -96,8 +93,7 @@ fun LivroFormScreen(
         ) {
             Text(
                 "Dados do livro",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleLarge,
                 color = TextDark
             )
 

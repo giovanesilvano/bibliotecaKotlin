@@ -14,12 +14,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bibliotecakotlin.ui.components.*
 import com.example.bibliotecakotlin.ui.theme.*
@@ -54,7 +51,6 @@ fun EmprestarScreen(
                 )
     }
 
-    // Prazo de devolução: hoje + 10 dias
     val prazoTexto = remember {
         val cal = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, 10) }
         SimpleDateFormat("d 'de' MMMM 'de' yyyy", Locale("pt", "BR")).format(cal.time)
@@ -64,9 +60,9 @@ fun EmprestarScreen(
         HeaderAzul("Novo empréstimo", "Emprestar Livro")
 
         Column(Modifier.verticalScroll(rememberScrollState()).padding(20.dp)) {
-            Text("Encontre o livro", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextDark)
+            Text("Encontre o livro", style = MaterialTheme.typography.titleLarge, color = TextDark)
             Spacer(Modifier.height(6.dp))
-            Text("Busque pelo título ou escaneie o código de barras da obra.", color = TextGray, fontSize = 14.sp)
+            Text("Busque pelo título ou escaneie o código de barras da obra.", color = TextGray, style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(16.dp))
             CampoBusca(busca, { busca = it }, "Título ou código", trailing = {
                 Icon(Icons.Outlined.QrCodeScanner, contentDescription = "Escanear", tint = Primary)
@@ -74,20 +70,20 @@ fun EmprestarScreen(
 
             emprestimoVm.mensagem?.let {
                 Spacer(Modifier.height(12.dp))
-                Text(it, color = Red, fontSize = 14.sp)
+                Text(it, color = Red, style = MaterialTheme.typography.bodyMedium)
             }
 
             Spacer(Modifier.height(24.dp))
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    "Livro selecionado", fontSize = 20.sp, fontWeight = FontWeight.Bold,
+                    "Livro selecionado", style = MaterialTheme.typography.titleLarge,
                     color = TextDark, modifier = Modifier.weight(1f)
                 )
                 if (livro != null) {
                     Text(
                         if (livro.disponivel) "Encontrado" else "Indisponível",
                         color = if (livro.disponivel) Green else Red,
-                        fontWeight = FontWeight.SemiBold, fontSize = 14.sp
+                        style = MaterialTheme.typography.labelLarge
                     )
                 }
             }
@@ -100,7 +96,7 @@ fun EmprestarScreen(
                         termo.isBlank() -> "Digite o título, autor ou ISBN para buscar."
                         else -> "Nenhum livro encontrado."
                     },
-                    color = TextGray, fontSize = 14.sp
+                    color = TextGray, style = MaterialTheme.typography.bodyMedium
                 )
             } else {
                 CardBranco {
@@ -111,12 +107,12 @@ fun EmprestarScreen(
                             if (livro.disponivel) Badge("● Disponível (${livro.quantidadeDisponivel}/${livro.quantidade})", Green, GreenLight)
                             else Badge("● Esgotado", Red, RedLight)
                             Spacer(Modifier.height(16.dp))
-                            Text(livro.titulo, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TextDark)
-                            Text(livro.autor, color = TextGray, fontSize = 16.sp)
+                            Text(livro.titulo, style = MaterialTheme.typography.headlineSmall, color = TextDark)
+                            Text(livro.autor, color = TextGray, style = MaterialTheme.typography.bodyLarge)
                             Spacer(Modifier.height(16.dp))
-                            Text(livro.categoria, color = TextGray, fontSize = 14.sp)
+                            Text(livro.categoria, color = TextGray, style = MaterialTheme.typography.bodyMedium)
                             Spacer(Modifier.height(6.dp))
-                            Text(livro.estante, color = TextGray, fontSize = 14.sp)
+                            Text(livro.estante, color = TextGray, style = MaterialTheme.typography.bodyMedium)
                         }
                     }
                     HorizontalDivider(color = PrimaryLight)
@@ -138,13 +134,13 @@ fun EmprestarScreen(
                 Box(Modifier.size(56.dp).clip(CircleShape).background(Color.White))
                 Spacer(Modifier.width(16.dp))
                 Column {
-                    Text("Prazo de empréstimo", color = Primary, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                    Text("Prazo de empréstimo", color = Primary, style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(4.dp))
                     Text(buildAnnotatedString {
                         append("A devolução está prevista para ")
-                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(prazoTexto) }
+                        withStyle(MaterialTheme.typography.labelLarge.toSpanStyle()) { append(prazoTexto) }
                         append(". O prazo é de 10 dias.")
-                    }, color = Primary, fontSize = 14.sp)
+                    }, color = Primary, style = MaterialTheme.typography.bodyMedium)
                 }
             }
 
@@ -167,8 +163,8 @@ fun EmprestarScreen(
 @Composable
 private fun InfoColuna(rotulo: String, valor: String, modifier: Modifier) {
     Column(modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(rotulo, color = TextLight, fontSize = 12.sp, letterSpacing = 1.sp)
+        Text(rotulo, color = TextLight, style = MaterialTheme.typography.labelSmall)
         Spacer(Modifier.height(4.dp))
-        Text(valor, color = TextDark, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+        Text(valor, color = TextDark, style = MaterialTheme.typography.titleSmall)
     }
 }

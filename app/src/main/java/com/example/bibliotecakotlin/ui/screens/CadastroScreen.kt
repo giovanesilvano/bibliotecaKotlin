@@ -72,7 +72,6 @@ fun CadastroScreen(
         }
     }
 
-    // Cadastro concluído: avisa e vai para o login
     LaunchedEffect(vm.concluido) {
         if (vm.concluido) {
             Toast.makeText(context, "Cadastro realizado com sucesso.", Toast.LENGTH_SHORT).show()
@@ -81,7 +80,6 @@ fun CadastroScreen(
         }
     }
 
-    // Erros (validação, e-mail duplicado, etc.)
     LaunchedEffect(vm.mensagem) {
         vm.mensagem?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()

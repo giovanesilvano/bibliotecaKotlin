@@ -1,4 +1,3 @@
-// auth/SessaoUsuario.kt
 package com.example.bibliotecakotlin.auth
 
 object SessaoUsuario {

@@ -9,9 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bibliotecakotlin.data.model.Usuario
 import com.example.bibliotecakotlin.ui.components.*
@@ -57,15 +55,15 @@ fun UsuariosScreen(
                 item {
                     Text(
                         if (vm.carregando) "Carregando..." else "Nenhum usuário cadastrado.",
-                        color = TextGray, fontSize = 14.sp
+                        color = TextGray, style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }
             items(vm.usuarios, key = { it.id }) { u ->
                 CardBranco {
                     Column(Modifier.padding(20.dp)) {
-                        Text(u.nome, fontSize = 17.sp, fontWeight = FontWeight.Bold, color = TextDark)
-                        Text(u.email, color = TextGray, fontSize = 14.sp)
+                        Text(u.nome, style = MaterialTheme.typography.titleMedium, color = TextDark)
+                        Text(u.email, color = TextGray, style = MaterialTheme.typography.bodyMedium)
                     }
                     HorizontalDivider(color = PrimaryLight, modifier = Modifier.padding(horizontal = 20.dp))
                     Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp)) {

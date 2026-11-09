@@ -10,9 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bibliotecakotlin.data.model.Livro
 import com.example.bibliotecakotlin.ui.components.*
@@ -73,7 +71,7 @@ fun CatalogoScreen(
                 item {
                     Text(
                         if (vm.carregando) "Carregando..." else "Nenhum livro encontrado.",
-                        color = TextGray, fontSize = 14.sp
+                        color = TextGray, style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }
@@ -86,16 +84,16 @@ fun CatalogoScreen(
                         Column(Modifier.weight(1f)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    l.titulo, fontSize = 17.sp, fontWeight = FontWeight.Bold,
+                                    l.titulo, style = MaterialTheme.typography.titleMedium,
                                     color = TextDark, modifier = Modifier.weight(1f)
                                 )
                                 if (l.disponivel) Badge("Disponível (${l.quantidadeDisponivel}/${l.quantidade})", Green, GreenLight)
                                 else Badge("Esgotado", Red, RedLight)
                             }
-                            Text(l.autor, color = TextGray, fontSize = 14.sp)
+                            Text(l.autor, color = TextGray, style = MaterialTheme.typography.bodyMedium)
                             Spacer(Modifier.height(8.dp))
-                            Text(l.categoria, color = TextGray, fontSize = 13.sp)
-                            Text(l.estante, color = TextGray, fontSize = 13.sp)
+                            Text(l.categoria, color = TextGray, style = MaterialTheme.typography.bodySmall)
+                            Text(l.estante, color = TextGray, style = MaterialTheme.typography.bodySmall)
                         }
                     }
                     HorizontalDivider(color = PrimaryLight, modifier = Modifier.padding(horizontal = 20.dp))

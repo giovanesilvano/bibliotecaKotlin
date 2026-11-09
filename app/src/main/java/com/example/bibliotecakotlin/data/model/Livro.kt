@@ -1,4 +1,3 @@
-// data/model/Livro.kt  (ajuste ao seu modelo atual, apenas ganha "id")
 package com.example.bibliotecakotlin.data.model
 
 import androidx.compose.ui.graphics.Color

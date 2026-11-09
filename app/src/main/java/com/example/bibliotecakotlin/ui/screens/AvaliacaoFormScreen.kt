@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -20,9 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bibliotecakotlin.ui.components.BotaoPrimario
 import com.example.bibliotecakotlin.ui.components.HeaderAzul
@@ -71,13 +70,13 @@ fun AvaliacaoFormScreen(
             Modifier.imePadding().verticalScroll(rememberScrollState()).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(model.livroTitulo, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextDark)
+            Text(model.livroTitulo, style = MaterialTheme.typography.titleLarge, color = TextDark)
 
-            Text("Nota", color = TextGray, fontSize = 14.sp)
+            Text("Nota", color = TextGray, style = MaterialTheme.typography.bodyMedium)
             Row {
                 (1..5).forEach { valor ->
                     TextButton(onClick = { model.mudarNota(valor) }) {
-                        Text(if (valor <= model.nota) "★" else "☆", color = Orange, fontSize = 32.sp)
+                        Text(if (valor <= model.nota) "★" else "☆", color = Orange, style = MaterialTheme.typography.displaySmall)
                     }
                 }
             }

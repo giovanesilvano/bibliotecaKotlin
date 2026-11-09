@@ -1,4 +1,3 @@
-// data/local/AppDatabase.kt
 package com.example.bibliotecakotlin.data.local
 
 import android.content.Context
@@ -80,7 +79,6 @@ internal class AppDatabase(context: Context) : SQLiteOpenHelper(
             )
             """.trimIndent()
         )
-        // Os livros de exemplo são inseridos pelo LivroDao (semearSeNecessario).
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {

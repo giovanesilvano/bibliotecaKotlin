@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import com.example.bibliotecakotlin.data.ImagemConversor
 import com.example.bibliotecakotlin.data.dal.LivroDao
 import com.example.bibliotecakotlin.data.model.Livro
+import com.example.bibliotecakotlin.ui.theme.Blue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -66,7 +67,7 @@ class CatalogoViewModel(app: Application) : AndroidViewModel(app) {
     fun salvar(
         id: Long, titulo: String, autor: String, categoria: String,
         isbn: String, edicao: String, estante: String, quantidade: Int = 1,
-        capaCor: Color = Color(0xFF1E88E5)
+        capaCor: Color = Blue
     ) {
         if (titulo.isBlank() || autor.isBlank() || categoria.isBlank()) {
             mensagem = "Informe título, autor e categoria."
