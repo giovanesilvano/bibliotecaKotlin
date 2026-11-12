@@ -31,3 +31,12 @@ data object LivroNovo
 
 @Serializable
 data class LivroEditar(val id: Long)
+
+@Serializable
+data object Avaliacoes
+
+@Serializable
+data class AvaliacaoNova(val livroId: Long)
+
+@Serializable
+data class AvaliacaoEditar(val id: Long)

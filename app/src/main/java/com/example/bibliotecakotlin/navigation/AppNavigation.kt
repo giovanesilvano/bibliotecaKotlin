@@ -12,8 +12,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.example.bibliotecakotlin.auth.SessaoUsuario
 import com.example.bibliotecakotlin.ui.components.BottomNav
 import com.example.bibliotecakotlin.ui.components.Tela
+import com.example.bibliotecakotlin.ui.screens.AvaliacaoFormScreen
+import com.example.bibliotecakotlin.ui.screens.AvaliacoesScreen
 import com.example.bibliotecakotlin.ui.screens.CadastroScreen
 import com.example.bibliotecakotlin.ui.screens.CatalogoScreen
 import com.example.bibliotecakotlin.ui.screens.DevolverScreen
@@ -63,7 +66,16 @@ fun AppNavigation(
             ) {
                 CatalogoScreen(
                     onNovoLivro = { navController.navigate(LivroNovo) },
-                    onEditarLivro = { navController.navigate(LivroEditar(it)) }
+                    onEditarLivro = { navController.navigate(LivroEditar(it)) },
+                    onAvaliarLivro = { navController.navigate(AvaliacaoNova(it)) },
+                    onSair = {
+                        SessaoUsuario.encerrar()
+                        navController.navigate(Login) {
+                            popUpTo(0) {
+                                inclusive = true
+                            }
+                        }
+                    }
                 )
             }
         }
@@ -139,6 +151,35 @@ fun AppNavigation(
                 EmprestimosScreen()
             }
         }
+
+        composable<Avaliacoes> {
+            TelaComNavegacao(
+                telaAtual = Tela.AVALIACOES,
+                navController = navController
+            ) {
+                AvaliacoesScreen(
+                    onEditar = { navController.navigate(AvaliacaoEditar(it)) }
+                )
+            }
+        }
+
+        composable<AvaliacaoNova> { entry ->
+            val rota = entry.toRoute<AvaliacaoNova>()
+            AvaliacaoFormScreen(
+                livroId = rota.livroId,
+                avaliacaoId = null,
+                onConcluir = { navController.popBackStack() }
+            )
+        }
+
+        composable<AvaliacaoEditar> { entry ->
+            val rota = entry.toRoute<AvaliacaoEditar>()
+            AvaliacaoFormScreen(
+                livroId = null,
+                avaliacaoId = rota.id,
+                onConcluir = { navController.popBackStack() }
+            )
+        }
     }
 }
 
@@ -184,6 +225,12 @@ private fun TelaComNavegacao(
 
                         Tela.EMPRESTIMOS -> {
                             navController.navigate(Emprestimos) {
+                                launchSingleTop = true
+                            }
+                        }
+
+                        Tela.AVALIACOES -> {
+                            navController.navigate(Avaliacoes) {
                                 launchSingleTop = true
                             }
                         }

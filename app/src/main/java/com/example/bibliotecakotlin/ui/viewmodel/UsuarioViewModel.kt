@@ -8,7 +8,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bibliotecakotlin.auth.SessaoUsuario
 import com.example.bibliotecakotlin.data.dal.UsuarioAdminDao
+import com.example.bibliotecakotlin.data.model.Endereco
 import com.example.bibliotecakotlin.data.model.Usuario
+import com.example.bibliotecakotlin.validation.CadastroValidator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -19,6 +21,12 @@ class UsuarioViewModel(app: Application) : AndroidViewModel(app) {
     var usuarios by mutableStateOf<List<Usuario>>(emptyList()); private set
     var usuario by mutableStateOf<Usuario?>(null); private set
     var nome by mutableStateOf(""); private set
+    var rua by mutableStateOf(""); private set
+    var numero by mutableStateOf(""); private set
+    var complemento by mutableStateOf(""); private set
+    var bairro by mutableStateOf(""); private set
+    var cidade by mutableStateOf(""); private set
+    var uf by mutableStateOf(""); private set
     var carregando by mutableStateOf(false); private set
     var salvo by mutableStateOf(false); private set
     var mensagem by mutableStateOf<String?>(null); private set
@@ -42,6 +50,12 @@ class UsuarioViewModel(app: Application) : AndroidViewModel(app) {
                 val u = withContext(Dispatchers.IO) { dao.buscarPorId(id) }
                 usuario = u
                 nome = u?.nome ?: ""
+                rua = u?.rua ?: ""
+                numero = u?.numero ?: ""
+                complemento = u?.complemento ?: ""
+                bairro = u?.bairro ?: ""
+                cidade = u?.cidade ?: ""
+                uf = u?.uf ?: ""
             } catch (e: Exception) {
                 mensagem = e.message ?: "Erro ao carregar o usuário."
             }
@@ -49,8 +63,22 @@ class UsuarioViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun mudarNome(valor: String) { nome = valor }
+    fun mudarRua(valor: String) { rua = valor }
+    fun mudarNumero(valor: String) { numero = valor }
+    fun mudarComplemento(valor: String) { complemento = valor }
+    fun mudarBairro(valor: String) { bairro = valor }
+    fun mudarCidade(valor: String) { cidade = valor }
+    fun mudarUf(valor: String) { uf = valor.take(2).uppercase() }
 
-    fun salvar(novaSenha: String) {
+    fun receberEndereco(endereco: Endereco) {
+        rua = endereco.rua.orEmpty()
+        complemento = endereco.complemento.orEmpty()
+        bairro = endereco.bairro.orEmpty()
+        cidade = endereco.cidade.orEmpty()
+        uf = endereco.uf.orEmpty()
+    }
+
+    fun salvar(novaSenha: String, cep: String) {
         val u = usuario ?: return
         if (nome.trim().length !in 3..100) {
             mensagem = "O nome deve ter entre 3 e 100 caracteres."
@@ -60,10 +88,17 @@ class UsuarioViewModel(app: Application) : AndroidViewModel(app) {
             mensagem = "A nova senha deve ter ao menos 6 caracteres."
             return
         }
+        CadastroValidator.validarEndereco(cep, rua, numero, bairro, cidade, uf)?.let { mensagem = it; return }
         viewModelScope.launch {
             carregando = true
             try {
-                withContext(Dispatchers.IO) { dao.atualizar(u.id, nome.trim(), novaSenha) }
+                withContext(Dispatchers.IO) {
+                    dao.atualizar(
+                        u.id, nome.trim(), novaSenha,
+                        cep.trim(), rua.trim(), numero.trim(), complemento.trim(),
+                        bairro.trim(), cidade.trim(), uf.trim().uppercase()
+                    )
+                }
                 salvo = true
             } catch (e: Exception) {
                 mensagem = e.message ?: "Erro ao salvar o usuário."

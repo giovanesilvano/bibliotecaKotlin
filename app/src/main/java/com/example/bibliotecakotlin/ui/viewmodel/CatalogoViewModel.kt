@@ -1,14 +1,17 @@
 package com.example.bibliotecakotlin.ui.viewmodel
 
 import android.app.Application
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.compose.ui.graphics.Color
+import com.example.bibliotecakotlin.data.ImagemConversor
 import com.example.bibliotecakotlin.data.dal.LivroDao
 import com.example.bibliotecakotlin.data.model.Livro
+import com.example.bibliotecakotlin.ui.theme.Blue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -18,6 +21,7 @@ class CatalogoViewModel(app: Application) : AndroidViewModel(app) {
 
     var livros by mutableStateOf<List<Livro>>(emptyList()); private set
     var livro by mutableStateOf<Livro?>(null); private set
+    var capa by mutableStateOf<ByteArray?>(null); private set
     var carregando by mutableStateOf(false); private set
     var salvo by mutableStateOf(false); private set
     var mensagem by mutableStateOf<String?>(null); private set
@@ -43,15 +47,27 @@ class CatalogoViewModel(app: Application) : AndroidViewModel(app) {
                 mensagem = e.message ?: "Erro ao carregar o livro."
                 null
             }
+            capa = livro?.capa
         }
     }
 
-    fun limparLivro() { livro = null }
+    fun limparLivro() { livro = null; capa = null }
+
+    fun receberCapa(uri: Uri?) {
+        if (uri == null) return
+        viewModelScope.launch {
+            try {
+                capa = ImagemConversor.paraBlob(getApplication<Application>(), uri)
+            } catch (e: Exception) {
+                mensagem = e.message ?: "Erro ao carregar a imagem."
+            }
+        }
+    }
 
     fun salvar(
         id: Long, titulo: String, autor: String, categoria: String,
         isbn: String, edicao: String, estante: String, quantidade: Int = 1,
-        capaCor: Color = Color(0xFF1E88E5)
+        capaCor: Color = Blue
     ) {
         if (titulo.isBlank() || autor.isBlank() || categoria.isBlank()) {
             mensagem = "Informe título, autor e categoria."
@@ -72,7 +88,8 @@ class CatalogoViewModel(app: Application) : AndroidViewModel(app) {
                     edicao = edicao.trim().ifBlank { "-" },
                     estante = estante.trim().ifBlank { "-" },
                     quantidade = qtd,
-                    quantidadeDisponivel = qtd
+                    quantidadeDisponivel = qtd,
+                    capa = capa
                 )
                 withContext(Dispatchers.IO) { if (id == 0L) dao.inserir(l) else dao.atualizar(l) }
                 salvo = true

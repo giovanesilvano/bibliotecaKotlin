@@ -9,22 +9,23 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.AssignmentReturn
 import androidx.compose.material.icons.outlined.LibraryBooks
 import androidx.compose.material.icons.outlined.MenuBook
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.example.bibliotecakotlin.ui.theme.*
 
-enum class Tela { LOGIN, CATALOGO, EMPRESTAR, DEVOLVER, EMPRESTIMOS }
+enum class Tela { LOGIN, CATALOGO, EMPRESTAR, DEVOLVER, EMPRESTIMOS, AVALIACOES }
 
 @Composable
-fun HeaderAzul(subtitulo: String, titulo: String, mostrarAvatar: Boolean = false) {
+fun HeaderAzul(subtitulo: String, titulo: String, mostrarAvatar: Boolean = false, onSair: (() -> Unit)? = null) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -34,10 +35,14 @@ fun HeaderAzul(subtitulo: String, titulo: String, mostrarAvatar: Boolean = false
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(subtitulo, color = Color.White.copy(alpha = 0.8f), fontSize = 13.sp)
-            Text(titulo, color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+            Text(subtitulo, color = Color.White.copy(alpha = 0.8f), style = MaterialTheme.typography.bodySmall)
+            Text(titulo, color = Color.White, style = MaterialTheme.typography.headlineMedium)
         }
-        if (mostrarAvatar) {
+        if (onSair != null) {
+            TextButton(onClick = onSair) {
+                Text("Sair", color = Color.White, style = MaterialTheme.typography.titleSmall)
+            }
+        } else if (mostrarAvatar) {
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -55,14 +60,15 @@ fun BottomNav(telaAtual: Tela, onNavigate: (Tela) -> Unit) {
             Triple(Tela.CATALOGO, "Catálogo", Icons.Outlined.MenuBook),
             Triple(Tela.EMPRESTAR, "Emprestar", Icons.Filled.Add),
             Triple(Tela.DEVOLVER, "Devolver", Icons.Outlined.AssignmentReturn),
-            Triple(Tela.EMPRESTIMOS, "Empréstimos", Icons.Outlined.LibraryBooks)
+            Triple(Tela.EMPRESTIMOS, "Empréstimos", Icons.Outlined.LibraryBooks),
+            Triple(Tela.AVALIACOES, "Avaliações", Icons.Outlined.StarOutline)
         )
         itens.forEach { (tela, label, icone) ->
             NavigationBarItem(
                 selected = telaAtual == tela,
                 onClick = { onNavigate(tela) },
                 icon = { Icon(icone, contentDescription = label) },
-                label = { Text(label, fontSize = 12.sp) },
+                label = { Text(label, style = MaterialTheme.typography.labelMedium) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = Primary,
                     selectedTextColor = Primary,
@@ -76,7 +82,18 @@ fun BottomNav(telaAtual: Tela, onNavigate: (Tela) -> Unit) {
 }
 
 @Composable
-fun CapaLivro(texto: String, cor: Color, largura: Int = 80, altura: Int = 120, autor: String? = null) {
+fun CapaLivro(texto: String, cor: Color, largura: Int = 80, altura: Int = 120, autor: String? = null, imagem: ByteArray? = null) {
+    if (imagem != null) {
+        AsyncImage(
+            model = imagem,
+            contentDescription = texto,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(largura.dp, altura.dp)
+                .clip(RoundedCornerShape(8.dp))
+        )
+        return
+    }
     Box(
         modifier = Modifier
             .size(largura.dp, altura.dp)
@@ -86,10 +103,10 @@ fun CapaLivro(texto: String, cor: Color, largura: Int = 80, altura: Int = 120, a
         contentAlignment = Alignment.BottomStart
     ) {
         Column {
-            Text(texto, color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold, lineHeight = 13.sp)
+            Text(texto, color = Color.White, style = MaterialTheme.typography.labelMedium)
             if (autor != null) {
                 Spacer(Modifier.height(6.dp))
-                Text(autor, color = Color.White.copy(alpha = 0.8f), fontSize = 9.sp)
+                Text(autor, color = Color.White.copy(alpha = 0.8f), style = MaterialTheme.typography.labelSmall)
             }
         }
     }
@@ -100,8 +117,7 @@ fun Badge(texto: String, corTexto: Color, corFundo: Color) {
     Text(
         texto,
         color = corTexto,
-        fontSize = 12.sp,
-        fontWeight = FontWeight.SemiBold,
+        style = MaterialTheme.typography.labelMedium,
         modifier = Modifier
             .background(corFundo, RoundedCornerShape(50))
             .padding(horizontal = 12.dp, vertical = 5.dp)
@@ -114,7 +130,7 @@ fun StatusDisponibilidade(disponivel: Boolean) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Box(Modifier.size(8.dp).clip(CircleShape).background(cor))
         Spacer(Modifier.width(6.dp))
-        Text(if (disponivel) "Disponível" else "Indisponível", color = cor, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+        Text(if (disponivel) "Disponível" else "Indisponível", color = cor, style = MaterialTheme.typography.labelLarge)
     }
 }
 
@@ -145,7 +161,7 @@ fun BotaoPrimario(texto: String, onClick: () -> Unit, modifier: Modifier = Modif
         colors = ButtonDefaults.buttonColors(containerColor = Primary),
         modifier = modifier.fillMaxWidth().height(56.dp)
     ) {
-        Text(texto, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+        Text(texto, style = MaterialTheme.typography.titleMedium)
     }
 }
 
@@ -163,7 +179,7 @@ fun CardBranco(modifier: Modifier = Modifier, content: @Composable ColumnScope.(
 @Composable
 fun TextoCentralizadoCinza(texto: String) {
     Text(
-        texto, color = TextGray, fontSize = 13.sp, textAlign = TextAlign.Center,
+        texto, color = TextGray, style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth()
     )
 }

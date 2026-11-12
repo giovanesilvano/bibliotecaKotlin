@@ -2,21 +2,22 @@ package com.example.bibliotecakotlin.data.dal
 
 import android.content.ContentValues
 import android.content.Context
-import androidx.compose.ui.graphics.Color
 import com.example.bibliotecakotlin.data.local.AppDatabase
 import com.example.bibliotecakotlin.data.model.Livro
+import com.example.bibliotecakotlin.ui.theme.Blue
 
 internal class LivroDao(context: Context) {
     private val appContext = context.applicationContext
     private val helper = AppDatabase(appContext)
 
-    private val corPadrao = Color(0xFF1E88E5)
+    private val corPadrao = Blue
 
     private val select = """
         SELECT l.id, l.titulo, l.autor, l.categoria, l.capa_texto,
                l.isbn, l.edicao, l.estante, l.quantidade,
                (l.quantidade - (SELECT COUNT(*) FROM emprestimos e
-                                WHERE e.livro_id = l.id AND e.devolvido_em IS NULL)) AS disponiveis
+                                WHERE e.livro_id = l.id AND e.devolvido_em IS NULL)) AS disponiveis,
+               l.capa
         FROM livros l
     """.trimIndent()
 
@@ -58,6 +59,7 @@ internal class LivroDao(context: Context) {
         put("edicao", l.edicao)
         put("estante", l.estante)
         put("quantidade", l.quantidade)
+        put("capa", l.capa)
     }
 
     private fun android.database.Cursor.paraLivro(): Livro {
@@ -75,13 +77,14 @@ internal class LivroDao(context: Context) {
             estante = getString(7),
             quantidade = total,
             quantidadeDisponivel = maxOf(0, disponiveis),
-            disponivel = disponiveis > 0
+            disponivel = disponiveis > 0,
+            capa = if (isNull(10)) null else getBlob(10)
         )
     }
 
     private fun semearSeNecessario() {
         val prefs = appContext.getSharedPreferences("biblioteca", Context.MODE_PRIVATE)
-        if (prefs.getBoolean("seed_livros", false)) return
+        if (prefs.getBoolean("seed_livros_v4", false)) return
         val vazio = helper.readableDatabase.rawQuery("SELECT COUNT(*) FROM livros", null)
             .use { it.moveToFirst() && it.getInt(0) == 0 }
         if (vazio) {
@@ -96,6 +99,6 @@ internal class LivroDao(context: Context) {
                     capaTexto = "PP", capaCor = corPadrao, isbn = "9788522008731", edicao = "1ª", estante = "D4", quantidade = 5, quantidadeDisponivel = 5)
             ).forEach { inserir(it) }
         }
-        prefs.edit().putBoolean("seed_livros", true).apply()
+        prefs.edit().putBoolean("seed_livros_v4", true).apply()
     }
 }

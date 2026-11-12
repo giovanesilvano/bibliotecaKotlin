@@ -10,9 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bibliotecakotlin.data.model.Livro
 import com.example.bibliotecakotlin.ui.components.*
@@ -23,6 +21,8 @@ import com.example.bibliotecakotlin.ui.viewmodel.CatalogoViewModel
 fun CatalogoScreen(
     onNovoLivro: () -> Unit,
     onEditarLivro: (Long) -> Unit,
+    onAvaliarLivro: (Long) -> Unit,
+    onSair: () -> Unit,
     vm: CatalogoViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -58,7 +58,7 @@ fun CatalogoScreen(
     }
 
     Column(Modifier.fillMaxSize().background(Background)) {
-        HeaderAzul("Acervo", "Catálogo", mostrarAvatar = true)
+        HeaderAzul("Acervo", "Catálogo", mostrarAvatar = true, onSair = onSair)
 
         LazyColumn(
             contentPadding = PaddingValues(20.dp),
@@ -71,7 +71,7 @@ fun CatalogoScreen(
                 item {
                     Text(
                         if (vm.carregando) "Carregando..." else "Nenhum livro encontrado.",
-                        color = TextGray, fontSize = 14.sp
+                        color = TextGray, style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }
@@ -79,26 +79,27 @@ fun CatalogoScreen(
             items(filtrados, key = { it.id }) { l ->
                 CardBranco {
                     Row(Modifier.padding(20.dp)) {
-                        CapaLivro(l.capaTexto, l.capaCor, largura = 90, altura = 130)
+                        CapaLivro(l.capaTexto, l.capaCor, largura = 90, altura = 130, imagem = l.capa)
                         Spacer(Modifier.width(16.dp))
                         Column(Modifier.weight(1f)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    l.titulo, fontSize = 17.sp, fontWeight = FontWeight.Bold,
+                                    l.titulo, style = MaterialTheme.typography.titleMedium,
                                     color = TextDark, modifier = Modifier.weight(1f)
                                 )
                                 if (l.disponivel) Badge("Disponível (${l.quantidadeDisponivel}/${l.quantidade})", Green, GreenLight)
                                 else Badge("Esgotado", Red, RedLight)
                             }
-                            Text(l.autor, color = TextGray, fontSize = 14.sp)
+                            Text(l.autor, color = TextGray, style = MaterialTheme.typography.bodyMedium)
                             Spacer(Modifier.height(8.dp))
-                            Text(l.categoria, color = TextGray, fontSize = 13.sp)
-                            Text(l.estante, color = TextGray, fontSize = 13.sp)
+                            Text(l.categoria, color = TextGray, style = MaterialTheme.typography.bodySmall)
+                            Text(l.estante, color = TextGray, style = MaterialTheme.typography.bodySmall)
                         }
                     }
                     HorizontalDivider(color = PrimaryLight, modifier = Modifier.padding(horizontal = 20.dp))
                     Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp)) {
                         TextButton(onClick = { onEditarLivro(l.id) }) { Text("Editar", color = Primary) }
+                        TextButton(onClick = { onAvaliarLivro(l.id) }) { Text("Avaliar", color = Primary) }
                         TextButton(onClick = { excluir = l }) { Text("Excluir", color = Red) }
                     }
                 }

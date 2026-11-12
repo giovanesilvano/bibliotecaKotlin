@@ -1,4 +1,3 @@
-// ui/viewmodel/EmprestimoViewModel.kt
 package com.example.bibliotecakotlin.ui.viewmodel
 
 import android.app.Application
@@ -68,6 +67,19 @@ class EmprestimoViewModel(app: Application) : AndroidViewModel(app) {
                 concluido = true
                 listar()
             } catch (e: Exception) { mensagem = e.message ?: "Erro ao devolver" }
+            finally { carregando = false }
+        }
+    }
+
+    fun cancelar(emprestimoId: Long) {
+        viewModelScope.launch {
+            carregando = true
+            try {
+                withContext(Dispatchers.IO) {
+                    emprestimoDao.cancelar(emprestimoId, SessaoUsuario.exigirUsuario())
+                }
+                listar()
+            } catch (e: Exception) { mensagem = e.message ?: "Erro ao cancelar" }
             finally { carregando = false }
         }
     }

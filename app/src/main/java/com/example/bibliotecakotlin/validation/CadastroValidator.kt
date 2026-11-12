@@ -1,10 +1,8 @@
-// validation/CadastroValidator.kt  (versão minha: regras simples, ajuste às suas)
 package com.example.bibliotecakotlin.validation
 
 import android.util.Patterns
 
 object CadastroValidator {
-    /** Retorna a mensagem de erro ou null se válido. */
     fun validar(nome: String, email: String, senha: String?, confirmar: String? = senha): String? {
         if (nome.isBlank()) return "Informe o nome"
         if (email.isNotBlank() || senha != null) {
@@ -13,6 +11,14 @@ object CadastroValidator {
         if (senha != null) {
             if (senha.length < 6) return "A senha deve ter ao menos 6 caracteres"
             if (senha != confirmar) return "As senhas não conferem"
+        }
+        return null
+    }
+
+    fun validarEndereco(cep: String, rua: String, numero: String, bairro: String, cidade: String, uf: String): String? {
+        if (!Regex("[0-9]{5}-?[0-9]{3}").matches(cep.trim())) return "Informe um CEP válido"
+        if (rua.isBlank() || numero.isBlank() || bairro.isBlank() || cidade.isBlank() || uf.isBlank()) {
+            return "Preencha o endereço completo"
         }
         return null
     }

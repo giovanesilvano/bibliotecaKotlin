@@ -13,9 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bibliotecakotlin.data.model.StatusEmprestimo
 import com.example.bibliotecakotlin.ui.components.*
@@ -50,15 +48,15 @@ fun DevolverScreen(
         HeaderAzul("Finalizar empréstimo", "Devolver Livro")
 
         Column(Modifier.verticalScroll(rememberScrollState()).padding(20.dp)) {
-            Text("Localize o empréstimo", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = TextDark)
+            Text("Localize o empréstimo", style = MaterialTheme.typography.titleLarge, color = TextDark)
             Spacer(Modifier.height(6.dp))
-            Text("Informe o título ou código do livro que deseja devolver.", color = TextGray, fontSize = 14.sp)
+            Text("Informe o título ou código do livro que deseja devolver.", color = TextGray, style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(16.dp))
             CampoBusca(busca, { busca = it }, "Título ou código")
 
             vm.mensagem?.let {
                 Spacer(Modifier.height(12.dp))
-                Text(it, color = Red, fontSize = 14.sp)
+                Text(it, color = Red, style = MaterialTheme.typography.bodyMedium)
             }
 
             Spacer(Modifier.height(24.dp))
@@ -66,7 +64,7 @@ fun DevolverScreen(
             if (emprestimo == null) {
                 Text(
                     if (vm.carregando) "Carregando..." else "Nenhum empréstimo ativo encontrado.",
-                    color = TextGray, fontSize = 14.sp
+                    color = TextGray, style = MaterialTheme.typography.bodyMedium
                 )
             } else {
                 val atrasado = emprestimo.status == StatusEmprestimo.ATRASADO
@@ -76,7 +74,7 @@ fun DevolverScreen(
 
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        "Empréstimo ativo", fontSize = 20.sp, fontWeight = FontWeight.Bold,
+                        "Empréstimo ativo", style = MaterialTheme.typography.titleLarge,
                         color = TextDark, modifier = Modifier.weight(1f)
                     )
                     Badge(if (atrasado) "Atrasado" else "Em dia", corStatus, fundoStatus)
@@ -88,19 +86,19 @@ fun DevolverScreen(
                         CapaLivro(livro.capaTexto, livro.capaCor, largura = 120, altura = 170, autor = livro.autor)
                         Spacer(Modifier.width(20.dp))
                         Column {
-                            Text(livro.titulo, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = TextDark)
-                            Text(livro.autor, color = TextGray, fontSize = 16.sp)
+                            Text(livro.titulo, style = MaterialTheme.typography.headlineSmall, color = TextDark)
+                            Text(livro.autor, color = TextGray, style = MaterialTheme.typography.bodyLarge)
                             Spacer(Modifier.height(20.dp))
-                            Text("EMPRESTADO EM", color = TextLight, fontSize = 11.sp, letterSpacing = 1.sp)
+                            Text("EMPRESTADO EM", color = TextLight, style = MaterialTheme.typography.labelSmall)
                             Text(
                                 emprestimo.emprestadoEm, color = TextDark,
-                                fontWeight = FontWeight.SemiBold, fontSize = 14.sp
+                                style = MaterialTheme.typography.labelLarge
                             )
                             Spacer(Modifier.height(12.dp))
-                            Text("DEVOLUÇÃO PREVISTA", color = TextLight, fontSize = 11.sp, letterSpacing = 1.sp)
+                            Text("DEVOLUÇÃO PREVISTA", color = TextLight, style = MaterialTheme.typography.labelSmall)
                             Text(
                                 emprestimo.devolverAte, color = corStatus,
-                                fontWeight = FontWeight.Bold, fontSize = 14.sp
+                                style = MaterialTheme.typography.labelLarge
                             )
                         }
                     }
@@ -110,18 +108,18 @@ fun DevolverScreen(
                     ) {
                         Box(
                             Modifier.size(56.dp).clip(CircleShape)
-                                .background(if (atrasado) Color(0xFFFFE0E0) else Color.White)
+                                .background(if (atrasado) RedSoft else Color.White)
                         )
                         Spacer(Modifier.width(16.dp))
                         Column {
                             Text(
                                 emprestimo.infoPrazo, color = corStatus,
-                                fontWeight = FontWeight.Bold, fontSize = 17.sp
+                                style = MaterialTheme.typography.titleMedium
                             )
                             Text(
                                 if (atrasado) "Realize a devolução para regularizar sua situação."
                                 else "Devolva até a data prevista para evitar atraso.",
-                                color = corStatus, fontSize = 13.sp
+                                color = corStatus, style = MaterialTheme.typography.bodySmall
                             )
                         }
                     }
@@ -135,11 +133,11 @@ fun DevolverScreen(
                     .border(1.dp, Border, RoundedCornerShape(16.dp))
                     .padding(20.dp)
             ) {
-                Text("Antes de confirmar", color = Primary, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+                Text("Antes de confirmar", color = Primary, style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(6.dp))
                 Text(
                     "Entregue o exemplar no balcão da biblioteca ou deposite-o na caixa de devolução indicada.",
-                    color = Primary, fontSize = 14.sp
+                    color = Primary, style = MaterialTheme.typography.bodyMedium
                 )
             }
 

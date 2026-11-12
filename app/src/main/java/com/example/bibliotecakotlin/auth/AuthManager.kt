@@ -1,4 +1,3 @@
-// auth/AuthManager.kt
 package com.example.bibliotecakotlin.auth
 
 import java.security.SecureRandom

@@ -1,4 +1,3 @@
-// data/dal/UsuarioDao.kt
 package com.example.bibliotecakotlin.data.dal
 
 import android.content.ContentValues
@@ -12,12 +11,23 @@ internal class SenhaSalva(val hash: ByteArray, val salt: ByteArray, val usuarioI
 internal class UsuarioDao(context: Context) {
     private val helper = AppDatabase(context)
 
-        fun cadastrar(nome: String, email: String, senha: ByteArray, salt: ByteArray): Long {
+    fun cadastrar(
+        nome: String, email: String, senha: ByteArray, salt: ByteArray,
+        cep: String, rua: String, numero: String, complemento: String,
+        bairro: String, cidade: String, uf: String
+    ): Long {
         val v = ContentValues().apply {
             put("nome", nome)
             put("email", email.trim().lowercase())
             put("senha", senha)
             put("salt", salt)
+            put("cep", cep)
+            put("rua", rua)
+            put("numero", numero)
+            put("complemento", complemento)
+            put("bairro", bairro)
+            put("cidade", cidade)
+            put("uf", uf)
         }
         try {
             return helper.writableDatabase.insertOrThrow("usuarios", null, v)

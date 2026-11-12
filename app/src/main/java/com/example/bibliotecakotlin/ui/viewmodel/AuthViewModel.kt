@@ -1,4 +1,3 @@
-// ui/viewmodel/AuthViewModel.kt
 package com.example.bibliotecakotlin.ui.viewmodel
 
 import android.app.Application
@@ -22,14 +21,24 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
     var concluido by mutableStateOf(false); private set
     var mensagem by mutableStateOf<String?>(null); private set
 
-    fun cadastrar(nome: String, email: String, senha: String, confirmar: String = senha) {
+    fun cadastrar(
+        nome: String, email: String, senha: String,
+        cep: String, rua: String, numero: String, complemento: String,
+        bairro: String, cidade: String, uf: String,
+        confirmar: String = senha
+    ) {
         CadastroValidator.validar(nome, email, senha, confirmar)?.let { mensagem = it; return }
+        CadastroValidator.validarEndereco(cep, rua, numero, bairro, cidade, uf)?.let { mensagem = it; return }
         viewModelScope.launch {
             carregando = true
             try {
                 withContext(Dispatchers.IO) {
                     val salt = AuthManager.criarSalt()
-                    dao.cadastrar(nome.trim(), email, AuthManager.gerarHash(senha, salt), salt)
+                    dao.cadastrar(
+                        nome.trim(), email, AuthManager.gerarHash(senha, salt), salt,
+                        cep.trim(), rua.trim(), numero.trim(), complemento.trim(),
+                        bairro.trim(), cidade.trim(), uf.trim().uppercase()
+                    )
                 }
                 concluido = true
             } catch (e: Exception) {

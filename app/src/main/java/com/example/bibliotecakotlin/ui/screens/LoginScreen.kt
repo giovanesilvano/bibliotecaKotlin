@@ -45,7 +45,6 @@ fun LoginScreen(
 
     val context = LocalContext.current
 
-    // Login concluído: limpa o estado e navega
     LaunchedEffect(vm.concluido) {
         if (vm.concluido) {
             vm.consumirResultado()
@@ -53,7 +52,6 @@ fun LoginScreen(
         }
     }
 
-    // Erros (credenciais inválidas, etc.)
     LaunchedEffect(vm.mensagem) {
         vm.mensagem?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()

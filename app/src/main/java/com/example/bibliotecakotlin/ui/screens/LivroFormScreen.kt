@@ -1,6 +1,9 @@
 package com.example.bibliotecakotlin.ui.screens
 
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,13 +12,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil3.compose.AsyncImage
 import com.example.bibliotecakotlin.ui.components.*
 import com.example.bibliotecakotlin.ui.theme.*
 import com.example.bibliotecakotlin.ui.viewmodel.CatalogoViewModel
@@ -35,7 +37,11 @@ fun LivroFormScreen(
     var edicao by remember { mutableStateOf("") }
     var estante by remember { mutableStateOf("") }
     var quantidade by remember { mutableStateOf("1") }
-    var capaCor by remember { mutableStateOf(Color(0xFF1E88E5)) }
+    var capaCor by remember { mutableStateOf(Blue) }
+
+    val galeria = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri -> vm.receberCapa(uri) }
 
     LaunchedEffect(livroId) {
         if (livroId != null) {
@@ -87,8 +93,7 @@ fun LivroFormScreen(
         ) {
             Text(
                 "Dados do livro",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleLarge,
                 color = TextDark
             )
 
@@ -130,6 +135,30 @@ fun LivroFormScreen(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
+
+            vm.capa?.let { capa ->
+                AsyncImage(
+                    model = capa,
+                    contentDescription = "Capa do livro",
+                    modifier = Modifier.fillMaxWidth().height(200.dp),
+                    contentScale = ContentScale.Fit
+                )
+            }
+
+            OutlinedButton(
+                onClick = {
+                    try {
+                        galeria.launch(PickVisualMediaRequest(
+                            ActivityResultContracts.PickVisualMedia.ImageOnly
+                        ))
+                    } catch (_: Exception) {
+                        Toast.makeText(context, "Não foi possível abrir a galeria.", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(if (vm.capa == null) "Escolher capa da galeria" else "Trocar capa")
+            }
 
             Spacer(Modifier.height(8.dp))
 
